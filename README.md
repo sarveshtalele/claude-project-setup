@@ -9,7 +9,7 @@ Greenfield or brownfield, from one brief, with nothing written until you approve
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757?style=flat-square&logo=claude&logoColor=white)](https://code.claude.com/docs/en/plugins)
 [![Python](https://img.shields.io/badge/python-3.9%2B-3776AB?style=flat-square&logo=python&logoColor=white)](docs/getting-started.md#prerequisites)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-16a34a?style=flat-square)](docs/development.md#conventions)
-[![Tests](https://img.shields.io/badge/tests-24%2F24%20passing-16a34a?style=flat-square)](docs/development.md#test-and-validate)
+[![Tests](https://img.shields.io/badge/tests-28%2F28%20passing-16a34a?style=flat-square)](docs/development.md#test-and-validate)
 [![Platforms](https://img.shields.io/badge/macOS%20%7C%20Linux%20%7C%20Windows-64748b?style=flat-square)](docs/troubleshooting.md)
 [![Last commit](https://img.shields.io/github/last-commit/sarveshtalele/claude-project-setup?style=flat-square)](https://github.com/sarveshtalele/claude-project-setup/commits/main)
 
@@ -39,6 +39,7 @@ flowchart LR
 |---|---|
 | 🧭 **Starts from a chat description** | Say what you want to build, and the plugin drafts the brief and takes it from there |
 | 🏗️ **Greenfield and brownfield** | Official scaffolds for new projects; existing source code is never modified |
+| 🧩 **Apps, libraries, skills, agents, plugins** | Detects the project type, and generates skills (with step state machines), agents and plugin bundles that pass `claude plugin validate` |
 | 🗂️ **CLAUDE.md that scales** | A root file of ≤ 100 lines, plus a ≤ 40-line file per large module that loads only when needed |
 | 🤖 **Project-specific subagents** | 4 core agents plus specialists, filled in with your real commands and paths; add your own with `create-agent` |
 | 💸 **Model optimisation you control** | One editable file sets each agent's model, effort and turn limit (economy / balanced / quality), and an uncertain agent is retried once on a stronger model |
@@ -150,6 +151,7 @@ Everything is committed, so **teammates don't need the plugin**.
 | [Guardrails](docs/guardrails.md) | Levels, hooks, guard decisions, editable rule files |
 | [Agents](docs/agents.md) | The 9 agent templates, model optimisation (profiles, `/models`, escalation), `create-agent` |
 | [State machines](docs/state-machines.md) | Bootstrap and task machines, approvals from your own words, resume |
+| [Creating skills, agents and plugins](docs/creating-skills-and-plugins.md) | Project types, `create-skill`, `create-agent`, `create-plugin`, skill state machines |
 | [Integrations](docs/integrations.md) | Plugins and MCP: REUSE / ADD / SKIP / CONFLICT, secrets, permissions |
 | [Context management](docs/context-management.md) | `STATE.md`, session protocol, token savers |
 | [Architecture](docs/architecture.md) | Plugin internals, render file classes, upgrade path |

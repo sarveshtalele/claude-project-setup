@@ -62,3 +62,17 @@ They are covered by 4 regression evals. Those evals fail on the original scripts
 | Invalid policy (`gpt-4`, `ultra`) | Exit 2, nothing written; doctor FAIL |
 
 **Bug found and fixed:** after `/models apply`, managed keys came out in a different order than a fresh render produced, so upgrades flagged every agent as KEEP-EDITED. Managed keys are now written in a fixed order at the end of the frontmatter.
+
+## Phase 4: project types and generators
+| Check | Result |
+|---|---|
+| Type detection on real repos | Sample bundle and this repo → `plugin`; tokentelemetry → `app`; empty → `unknown` |
+| Generated `release-notes` skill (4 steps, 1 gate) | 16/16 of its own evals pass; `SKILL.md` is 45 lines with portable frontmatter |
+| Generated `release-kit` bundle (2 skills, 2 agents) | `claude plugin validate` passes at marketplace and plugin level; one shared tracker |
+| Invalid spec / re-run into existing files | Exit 2 / exit 3, nothing written |
+| Real run in set-up tokentelemetry | Step out of order refused (5); gate held (4); "looks good but…" ignored; self-approval refused (6); "approve skill-release-notes" recorded; guard asked before writing `RELEASE_NOTES.md`; DONE + report |
+| Upgrading a Phase-2-era setup | `render.py` from the manifest: 9 UPGRADE + 3 CREATE (model policy), seed files kept |
+
+**Findings:**
+- A 1-step skill would have had **0 evals**. Every generated skill now always gets structural evals (frontmatter, name, description, length).
+- Named approval of a skill run failed on a setup made before the approval wording was extended. Fixed by `doctor upgrade`, which proves why projects should run it after plugin updates.

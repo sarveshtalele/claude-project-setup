@@ -11,6 +11,7 @@
 ## Question bank (ask only when triggered)
 | Topic | Ask when | Example | Plan field |
 |---|---|---|---|
+| Project type | Scan says `unknown` (greenfield) and the brief says "recommend" | "What are we building: an app, a library/CLI, an Agent Skill, a set of agents, or a Claude Code plugin?" | routes step 6 |
 | Mode | Scan is ambiguous (a few files, no manifest) | "3 files, no manifest. Treat as greenfield?" | `mode` |
 | Stack | Brief says "recommend" or conflicts with the scan | "Next.js + FastAPI, or Vite SPA + Express?" | greenfield scaffold, `vars` |
 | Guardrail level | Brief says "recommend" | light / **standard** / strict, with the one-line definition of each | `level` |

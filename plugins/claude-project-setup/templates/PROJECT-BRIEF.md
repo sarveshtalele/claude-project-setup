@@ -7,6 +7,12 @@
 ## Goal
 <!-- One paragraph: what the project does and for whom. -->
 
+## Project type
+<!-- app | library | skill | agents | plugin | recommend
+     app = web/mobile/desktop app or service · library = package or CLI · skill = an Agent Skill ·
+     agents = a set of subagents · plugin = a Claude Code plugin / skill bundle -->
+recommend
+
 ## Users & key flows
 <!-- User stories, e.g. "As a <user> I want <action> so that <outcome>". -->
 -

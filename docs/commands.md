@@ -7,6 +7,8 @@
 | `/claude-project-setup:bootstrap [brief path]` | Scan → interview → plan → generate → verify | "bootstrap", "set up this project" |
 | `/claude-project-setup:doctor [upgrade] [--tools]` | Health table; `upgrade` refreshes generated files | "health check", "audit setup" |
 | `/claude-project-setup:integrations [list\|add\|remove\|audit]` | Plugins and MCP servers for this project | "which MCP should I use" |
+| `/claude-project-setup:create-skill [job]` | New Agent Skill: steps → state machine → evals; never overwrites | "create a skill that…" |
+| `/claude-project-setup:create-plugin [purpose]` | Plugin or skill bundle with a marketplace, shared tracker and agents; validated | "build a plugin…" |
 | `/claude-project-setup:create-agent [job]` | New subagent: tier → model per profile → minimal tools → output contract → test prompt | "create an agent that…" |
 
 ## Project skills (installed into `.claude/skills/`; work without the plugin)

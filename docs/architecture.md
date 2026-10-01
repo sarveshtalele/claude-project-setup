@@ -4,7 +4,7 @@
 flowchart TB
     subgraph Plugin["plugins/claude-project-setup (installed)"]
       SK["skills/<br/>brief · bootstrap · doctor · integrations"]
-      SC["scripts/<br/>scan_repo · scan_tools · render · doctor · hint"]
+      SC["scripts/<br/>scan_repo · scan_tools · render · scaffold · doctor · hint"]
       TP["templates/<br/>CLAUDE · agents · hooks · rules · settings"]
       CA["catalog/integrations.json"]
       HK["hooks/hooks.json<br/>SessionStart hint · approval capture"]
@@ -44,6 +44,7 @@ Exit code `2` means the plan is invalid (missing variable, unknown template, lit
 | `scan_repo.py [ROOT]` | Files (respects `.gitignore`) | JSON: mode, stack, modules, instructions |
 | `scan_tools.py [ROOT] --scan --needs` | `claude` CLI, `.mcp.json`, catalog | JSON: REUSE/ADD/SKIP/CONFLICT, token cost |
 | `render.py --target --plan [--dry-run] [--show]` | Plan JSON, or the manifest | Files + `.claude/setup-manifest.json` |
+| `scaffold.py --spec --target [--dry-run]` | Skill or plugin spec JSON | A skill (with machine, evals and tracker) or a plugin bundle; never overwrites |
 | `doctor.py [ROOT] [--tools]` | The project | PASS/WARN/FAIL table; exits 1 on any FAIL |
 | `hint.py` | `CLAUDE_PROJECT_DIR` | One line before setup, or "resume at <state>"; silent after |
 | `templates/state-machine/state_cli.py` | The event logs | Bootstrap and task machines ([State machines](state-machines.md)) |

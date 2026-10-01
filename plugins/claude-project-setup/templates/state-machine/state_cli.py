@@ -26,7 +26,7 @@ DEFS = {"task": os.path.join(HERE, "task.json"), "bootstrap": os.path.join(HERE,
 WORK_STATES = ("APPROVED", "IN_PROGRESS", "VERIFYING")
 APPROVAL_GUARD = "user_approved"
 APPROVE_RE = re.compile(r"^\s*(approved?|i approve|lgtm|go ahead|proceed|ship it|looks good)\b[\s.!,:-]*"
-                        r"((?:TASK-[\w.-]+|setup|plan)\b[\s.!]*)?$", re.I)
+                        r"((?:TASK-[\w.-]+|skill-[\w-]+|setup|plan)\b[\s.!]*)?$", re.I)
 NEGATION = re.compile(r"\b(not|don'?t|but|except|change|wait|hold|no)\b", re.I)
 
 if TRACKER:
@@ -86,7 +86,7 @@ def capture_approval(project, prompt, only=None):
     if not text or len(text) > 80 or not APPROVE_RE.match(text) or NEGATION.search(text):
         return ""
     waiting = [m for m in awaiting_approval(project) if only is None or only(m)]
-    named = re.search(r"TASK-[\w.-]+", text, re.I)
+    named = re.search(r"TASK-[\w.-]+|skill-[\w-]+", text, re.I)
     if named:
         waiting = [m for m in waiting if m.lower().startswith(named.group(0).lower().rstrip(".!"))]
     if not waiting:

@@ -13,6 +13,10 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
   - `/models` project skill and `create-agent` plugin skill (tier → model per profile → minimal tools → output contract).
   - Every agent reports `UNCERTAIN:` when unsure, and `CLAUDE.md` tells the main session to retry it once on the next tier.
   - `doctor` reports model drift (WARN) and invalid policies (FAIL).
+- Project types and generators (roadmap phase 4):
+  - `scan_repo` detects app, library, skill, agents, plugin or unknown, and bootstrap routes to the matching generator.
+  - `scaffold.py` plus the `create-skill` and `create-plugin` skills. Generated skills get portable frontmatter, `${CLAUDE_SKILL_DIR}` paths, a step state machine with review gates, `skill_state.py`, and evals derived from the machine. Plugin bundles get a marketplace, one shared tracker, tier-optimised agents and a README.
+  - Approvals can name a skill run (`approve skill-<name>`).
 ### Fixed
 - Scan no longer counts dot-folder tooling (`.claude/`, `.github/`) as project source.
 

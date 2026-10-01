@@ -37,6 +37,7 @@ sequenceDiagram
 - In a project that isn't set up yet, a one-line SessionStart hint tells Claude the plugin is available. It's silent once the project is set up.
 
 **2. Scan**: `scan_repo.py`
+- Detects the **project type**: app, library, skill, agents, plugin or unknown. For skill, agents and plugin projects, bootstrap offers the matching generator once the base setup is written ([details](creating-skills-and-plugins.md)).
 - Detects greenfield vs brownfield, languages, frameworks, package managers, scripts and test folders.
 - Lists existing `CLAUDE.md`, `AGENTS.md`, `.cursorrules` and `.claude/`.
 - Finds module candidates: folders with their own manifest, more than 150 source files, or a different language from the root.

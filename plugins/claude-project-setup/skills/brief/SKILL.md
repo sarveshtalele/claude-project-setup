@@ -12,6 +12,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/scripts/scan_repo.py" . > "${TMPDIR:-/tmp}/cps-sc
 ```
 - `mode: greenfield` means a new project; use the user's description for everything.
 - `mode: brownfield` means an existing repo. Prefill **Stack preferences** with `keep current (<frameworks from scan>)`; the description adds goals and requirements.
+- Prefill **Project type** with the scan's `project_type` (`plugin`, `skill`, `agents`, `app` or `library`) unless it's `unknown`, or the user said otherwise.
 - If `PROJECT-BRIEF.md` already exists, don't overwrite it. Show which sections are empty, then go to step 4.
 
 ## 2. Draft from the conversation (no invention)

@@ -43,6 +43,27 @@ FRAMEWORKS = {  # dependency name -> framework label
 FRONTEND = {"nextjs", "react", "vue", "nuxt", "angular", "svelte", "sveltekit", "solid", "astro",
             "jquery", "streamlit", "electron", "react-native", "expo"}
 TEST_DIR_NAMES = {"test", "tests", "__tests__", "spec", "e2e", "cypress"}
+APP_FRAMEWORKS = FRONTEND | {"express", "nestjs", "fastify", "hono", "fastapi", "django", "flask"}
+
+
+def project_type(files, frameworks, manifests):
+    """(type, evidence). Types: plugin, skill, agents, app, library, unknown (greenfield: ask)."""
+    names = set(files)
+    plugin = sorted(f for f in files if f.endswith((".claude-plugin/plugin.json", ".claude-plugin/marketplace.json")))
+    if plugin:
+        return "plugin", plugin[:3]
+    skills = sorted(f for f in files if f.rsplit("/", 1)[-1] == "SKILL.md" and not f.startswith(".claude/"))
+    if skills:
+        return "skill", skills[:3]
+    agents = sorted(f for f in files if re.match(r"^(\.claude/)?agents/[\w.-]+\.md$", f))
+    if agents and not manifests:
+        return "agents", agents[:3]
+    app = sorted(set(frameworks) & APP_FRAMEWORKS)
+    if app:
+        return "app", app
+    if manifests:
+        return "library", [m["path"] for m in manifests][:3]
+    return "unknown", []
 TEST_FILE_RE = re.compile(r"(\.test\.|\.spec\.|_test\.|^test_.*\.py$)")
 
 
@@ -148,10 +169,13 @@ def scan(root, threshold=150):
         if reasons:
             candidates.append({"path": d, "source_files": per_dir[d], "language": dl, "reasons": reasons})
 
+    ptype, pevidence = project_type(files, frameworks, manifests)
     remote = git_remote(root) if is_git else ""
     return {
         "root": root,
-        "mode": "brownfield" if source else "greenfield",
+        "mode": "brownfield" if source or ptype in ("plugin", "skill", "agents") else "greenfield",
+        "project_type": ptype,
+        "project_type_evidence": pevidence,
         "is_git": is_git,
         "git_remote_host": (re.match(r"^(?:https?://|ssh://)?(?:[^@/]+@)?([^/:]+)[/:]", remote).group(1)
                             if re.match(r"^(https?://|ssh://|git@)", remote) else None),

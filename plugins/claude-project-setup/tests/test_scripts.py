@@ -466,6 +466,106 @@ def model_drift_warns_and_bad_policy_fails():
     assert r.returncode == 2 and "turbo" in r.stderr, r.stderr
 
 
+SCAFFOLD = os.path.join(SCRIPTS, "scaffold.py")
+SKILL_SPEC = {"kind": "skill", "name": "release-notes", "title": "Release notes",
+              "description": "Draft release notes from the git log since the last tag. Use when the user asks for release notes.",
+              "steps": [{"id": "collect", "title": "Collect"}, {"id": "draft", "title": "Draft"},
+                        {"id": "review", "title": "Review", "gate": True}, {"id": "write", "title": "Write"}]}
+
+
+def scaffold(t, spec, *extra):
+    path = os.path.join(tempfile.mkdtemp(), "spec.json")
+    json.dump(spec, open(path, "w"))
+    return sh([PY, SCAFFOLD, "--spec", path, "--target", t, *extra], env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+
+
+@test
+def scan_detects_project_types():
+    cases = {
+        "plugin": {".claude-plugin/plugin.json": "{}"},
+        "skill": {"skills/x/SKILL.md": "---\nname: x\n---\n"},
+        "agents": {"agents/reviewer.md": "---\nname: reviewer\n---\n"},
+        "app": {"pyproject.toml": "[project]\ndependencies=['fastapi']\n", "app/main.py": "x=1"},
+        "library": {"pyproject.toml": "[project]\nname='lib'\n", "lib/core.py": "x=1"},
+        "unknown": {},
+    }
+    for want, files in cases.items():
+        t = fresh_repo()
+        for rel, text in files.items():
+            touch(t, rel, text)
+        d = json.loads(script("scan_repo.py", t).stdout)
+        assert d["project_type"] == want, (want, d["project_type"], d["project_type_evidence"])
+
+
+@test
+def scaffold_skill_is_tracked_and_its_evals_pass():
+    t = fresh_repo()
+    r = scaffold(t, SKILL_SPEC)
+    assert r.returncode == 0, r.stderr
+    base = os.path.join(t, ".claude/skills/release-notes")
+    fm = open(os.path.join(base, "SKILL.md")).read().split("\n---", 1)[0]
+    assert sorted(l.split(":")[0] for l in fm.splitlines()[1:]) == ["description", "name"], fm   # portable frontmatter
+    assert "${CLAUDE_SKILL_DIR}/scripts/skill_state.py" in open(os.path.join(base, "SKILL.md")).read()
+    ev = sh([PY, os.path.join(base, "evals/run_evals.py")], env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+    assert ev.returncode == 0 and "16/16" in ev.stdout, ev.stdout + ev.stderr
+    ver = json.load(open(os.path.join(base, "tracker/VERSION.json")))
+    assert ver["source"] == "claude-project-setup/tracker" and len(ver["sha256"]) == 64
+    small = dict(SKILL_SPEC, name="tag-check", steps=[{"id": "check", "title": "Check"}])
+    assert scaffold(t, small).returncode == 0
+    sb = os.path.join(t, ".claude/skills/tag-check")
+    assert not os.path.exists(os.path.join(sb, "machine.json")) and not os.path.exists(os.path.join(sb, "tracker"))
+    ev = sh([PY, os.path.join(sb, "evals/run_evals.py")])
+    assert ev.returncode == 0 and "3/3" in ev.stdout, ev.stdout
+
+
+@test
+def scaffold_plugin_bundle_shares_one_tracker_and_validates():
+    t = fresh_repo()
+    spec = {"kind": "plugin", "name": "release-kit", "author": "A", "description": "Release tooling for Claude Code projects.",
+            "skills": [SKILL_SPEC, dict(SKILL_SPEC, name="tag-check", steps=[{"id": "check", "title": "Check"}])],
+            "agents": [{"name": "release-judge", "tier": "judge", "description": "Reviews notes. Use when notes are drafted.",
+                        "mission": "check the draft.", "output": "BLOCKING: yes|no"}]}
+    r = scaffold(t, spec)
+    assert r.returncode == 0, r.stderr
+    root = os.path.join(t, "plugins/release-kit")
+    commons = [dp for dp, _, fs in os.walk(t) if "_common.py" in fs]
+    assert commons == [os.path.join(root, "tracker/scripts")], commons
+    ev = sh([PY, os.path.join(root, "skills/release-notes/evals/run_evals.py")], env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+    assert ev.returncode == 0, ev.stdout + ev.stderr
+    ag = frontmatter_of(os.path.join(root, "agents/release-judge.md"))
+    assert ag["model"] == "inherit" and "Edit" not in ag["tools"], ag
+    mk = json.load(open(os.path.join(t, ".claude-plugin/marketplace.json")))
+    assert mk["plugins"][0]["source"] == "./plugins/release-kit"
+    if __import__("shutil").which("claude"):
+        for d in (t, root):
+            v = sh(["claude", "plugin", "validate", d])
+            assert "Validation passed" in v.stdout + v.stderr, v.stdout + v.stderr
+    before = sorted(os.listdir(root))
+    r = scaffold(t, spec)
+    assert r.returncode == 3 and "REFUSED" in r.stderr and sorted(os.listdir(root)) == before
+    bad = scaffold(fresh_repo(), dict(SKILL_SPEC, name="Bad Name"))
+    assert bad.returncode == 2 and "name" in bad.stderr
+    gate_first = scaffold(fresh_repo(), dict(SKILL_SPEC, steps=[{"id": "r", "title": "R", "gate": True}]))
+    assert gate_first.returncode == 2
+
+
+@test
+def skill_gate_approved_only_by_user_in_set_up_project():
+    t = fresh_repo()
+    render(t, plan("standard"))
+    assert scaffold(t, SKILL_SPEC).returncode == 0
+    env = dict(os.environ, CLAUDE_PROJECT_DIR=t, PYTHONDONTWRITEBYTECODE="1")
+    st = lambda *a: sh([PY, ".claude/skills/release-notes/scripts/skill_state.py", *a], cwd=t, env=env)
+    hook = lambda m: sh([PY, ".claude/hooks/approval_capture.py"], cwd=t, inp=json.dumps({"prompt": m}), env=env).stdout
+    assert st("start").returncode == 0
+    for step in ("collect", "draft"):
+        st("begin", step); st("done", step)
+    assert st("done", "review").returncode == 4
+    assert st("approve", "approved").returncode == 6, "self-approval refused when the hook exists"
+    assert "Recorded" in hook("approve skill-release-notes")
+    assert st("done", "review").returncode == 0 and st("begin", "write").returncode == 0
+
+
 @test
 def upgrade_from_manifest_without_plan():
     t = fresh_repo()
