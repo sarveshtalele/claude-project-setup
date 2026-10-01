@@ -9,7 +9,7 @@ It interviews you about what's missing, shows the complete setup plan, and only 
 - **permissions**, **plugin and MCP server configuration** (reusing what you already have)
 - **memory that survives `/clear`, compaction and new sessions** (`docs/STATE.md`, injected automatically)
 
-Version `0.2.0` · Python 3.9+ standard library · macOS, Linux and Windows · 10/10 tests passing.
+Version `0.2.1` · Python 3.9+ standard library · macOS, Linux and Windows · 16/16 tests passing · [end-to-end tested on tokentelemetry](docs/E2E-TOKENTELEMETRY.md).
 
 ```
 /claude-project-setup:brief         create PROJECT-BRIEF.md; you fill it in

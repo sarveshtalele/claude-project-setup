@@ -31,8 +31,10 @@ def main():
     except subprocess.TimeoutExpired:
         print(json.dumps({"decision": "block", "reason": f"Fast tests timed out after {TIMEOUT_S}s: `{FAST_TEST_CMD}`."}))
         return
-    except Exception as e:
-        print(f"test_on_stop: could not run `{FAST_TEST_CMD}` ({e})", file=sys.stderr)
+    except OSError as e:  # command not found: a silent pass would disable the guardrail
+        print(json.dumps({"decision": "block", "reason":
+              f"Fast tests could not run: `{FAST_TEST_CMD}` ({e.__class__.__name__}: {e}). Tell the user; "
+              "the command must work from a plain shell in the project root (e.g. `.venv/bin/python -m pytest` or `uv run pytest`)."}))
         return
     if r.returncode != 0:
         tail = "\n".join((r.stdout + r.stderr).strip().splitlines()[-30:])

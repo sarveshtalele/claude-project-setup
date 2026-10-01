@@ -105,8 +105,10 @@ def classify(inv, proj, needs, catalog):
             row.update(cls="REUSE", reason=f"installed and covers {cap}")
             covered.add(cap)
         else:
-            row.update(cls="SKIP", reason="no matching need for this project" if cap is None
+            row.update(cls="SKIP", reason=("no matching need for this project" if cap is None
                        else f"provides {cap}, not needed here")
+                       + ("; still on via user scope: add to plan plugins.disable to turn it off here"
+                          if p.get("scope") == "user" and p.get("enabled", True) else ""))
     for cap, spec in catalog["capabilities"].items():  # exclusive capabilities: >1 enabled -> CONFLICT
         enabled = [r for r in rows if r["capability"] == cap and r["kind"] == "plugin"
                    and next((p for p in inv["installed"] if p.get("id") == r["id"]), {}).get("enabled", True)]

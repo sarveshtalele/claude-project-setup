@@ -13,7 +13,7 @@
   "protected": ["backend/*"],
   "write_allow": ["src/*", "tests/*"],
   "permissions": {"allow": ["Bash(npm test:*)"], "ask": [], "deny": ["Read(./run-outputs/**)"]},
-  "plugins": {"enable": ["ponytail@ponytail"], "marketplaces": {}},
+  "plugins": {"enable": ["ponytail@ponytail"], "disable": [], "marketplaces": {}},
   "mcp": ["playwright", "github", {"custom-name": {"command": "npx", "args": ["-y", "pkg"], "env": {"KEY": "${KEY}"}}}],
   "gitignore": []
 }
@@ -21,6 +21,8 @@
 - The 4 core agents (`explorer`, `implementer`, `verifier`, `reviewer`) are always included. `agents` lists the extras: `security-reviewer`, `test-writer`, `migration-reviewer`, `ui-verifier`, `module-expert`.
 - Hooks by level: **light** = guard, session_context · **standard** = + stop_gate · **strict** = + scope_check, test_on_stop. `format_on_edit` is separate. `selftest` is always included.
 - `mcp` strings are catalog names (`playwright`, `context7`, `github`, `sentry`, `firecrawl`). Custom objects always get an `ask` permission. Any env or header value must be a `${VAR}` reference, or render refuses the plan.
+- `plugins.disable` turns off, for this project only, plugins that are enabled at user scope (SKIP or CONFLICT rows the user chose to turn off).
+- `docs/STATE.md` and `docs/ARCHITECTURE.md` are **seed files**: they are created only if missing, and never diffed or upgraded afterwards. Their variables are needed only when the file doesn't exist yet.
 - `permissions.allow` should include the real test and lint commands, so the user isn't prompted for them.
 
 ## Variables (all required by the templates you include; `n/a` is allowed, but never invent values)
@@ -28,7 +30,7 @@
 |---|---|---|
 | `PROJECT_NAME`, `PROJECT_SUMMARY` | CLAUDE.md, ARCHITECTURE.md | brief Goal |
 | `RUNTIME`, `PACKAGE_MANAGER` | CLAUDE.md, implementer | scan |
-| `INSTALL_CMD`, `BUILD_CMD`, `LINT_CMD`, `TEST_CMD`, `FAST_TEST_CMD` | CLAUDE.md, verifier, implementer, test-writer, test_on_stop | scan scripts, each run once |
+| `INSTALL_CMD`, `BUILD_CMD`, `LINT_CMD`, `TEST_CMD`, `FAST_TEST_CMD` | CLAUDE.md, verifier, implementer, test-writer, test_on_stop | scan scripts, each run once. **`FAST_TEST_CMD` runs inside a hook, from a plain non-interactive shell with no activated venv**, so use `.venv/bin/python -m pytest` (Windows: `.venv\\Scripts\\python`) or `uv run pytest`, never a bare `python`. |
 | `LAYOUT` | CLAUDE.md | Markdown bullets, one per important folder |
 | `OUTPUTS_DIR` | CLAUDE.md, ui-verifier | brief or interview (outside the repo) |
 | `ARCH_OVERVIEW`, `ARCH_COMPONENTS`, `ARCH_EXTERNAL` | ARCHITECTURE.md | `ARCH_COMPONENTS` = table rows `\| name \| path \| responsibility \| talks to \|` |

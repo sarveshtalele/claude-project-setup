@@ -38,6 +38,7 @@ HOOK_EVENTS = {  # hook -> (event, matcher)
     "test_on_stop": ("Stop", None),
 }
 CORE_AGENTS = ["explorer", "implementer", "verifier", "reviewer"]
+SEED_FILES = {"docs/STATE.md", "docs/ARCHITECTURE.md"}  # created once, then owned by the user
 GITIGNORE_REQUIRED = [".env", ".env.*", "!.env.example", "CLAUDE.local.md", ".claude/settings.local.json"]
 
 
@@ -73,13 +74,34 @@ def fill(text, variables, where, missing):
     return VAR.sub(sub, text)
 
 
+FM_LINE = re.compile(r"^([A-Za-z][\w-]*): (.+)$")
+YAML_UNSAFE = re.compile(r"(: | #|^[\[\]{}&*!|>'\"%@`,?-])")
+
+
+def safe_frontmatter(text):
+    """Quote scalar frontmatter values that filled-in vars made invalid YAML (e.g. 'a: b' in a description)."""
+    if not text.startswith("---\n"):
+        return text
+    end = text.find("\n---", 4)
+    if end < 0:
+        return text
+    out = []
+    for line in text[4:end].split("\n"):
+        m = FM_LINE.match(line)
+        if m and YAML_UNSAFE.search(m.group(2)) and not (m.group(2).startswith('"') and m.group(2).endswith('"')):
+            line = f"{m.group(1)}: {json.dumps(m.group(2))}"
+        out.append(line)
+    return "---\n" + "\n".join(out) + text[end:]
+
+
 def sha(text):
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def frontmatter(text, key):
     m = re.search(rf"^{key}:\s*(.+)$", text.split("\n---", 1)[0], re.M)
-    return m.group(1).strip() if m else ""
+    v = m.group(1).strip() if m else ""
+    return json.loads(v) if v.startswith('"') and v.endswith('"') else v
 
 
 def load_catalog():
@@ -123,7 +145,7 @@ def build(plan, target):
     missing, owned = [], {}
 
     def add(path, template, extra=None):
-        owned[path] = (template, fill(tpl(template), {**v, **(extra or {})}, path, missing))
+        owned[path] = (template, safe_frontmatter(fill(tpl(template), {**v, **(extra or {})}, path, missing)))
 
     modules = plan.get("modules", [])
     env_vars = sorted({e for m in mcps.values() for e in m["env"]})
@@ -198,8 +220,9 @@ def build(plan, target):
         group["hooks"].append(entry)
     base["hooks"] = hooks_cfg
     plugins = plan.get("plugins", {})
-    if plugins.get("enable"):
-        base["enabledPlugins"] = {p: True for p in plugins["enable"]}
+    if plugins.get("enable") or plugins.get("disable"):
+        base["enabledPlugins"] = {**{p: False for p in plugins.get("disable", [])},
+                                  **{p: True for p in plugins.get("enable", [])}}
     if plugins.get("marketplaces"):
         base["extraKnownMarketplaces"] = plugins["marketplaces"]
 
@@ -225,10 +248,19 @@ def merge_settings(old, new):
         elif k == "hooks":
             h = cur.setdefault("hooks", {})
             for event, groups in val.items():
-                existing = {e.get("command") for grp in h.get(event, []) for e in grp.get("hooks", [])}
+                cur_groups = h.setdefault(event, [])
+                existing = {e.get("command") for grp in cur_groups for e in grp.get("hooks", [])}
                 for g in groups:
-                    if all(e["command"] not in existing for e in g["hooks"]):
-                        h.setdefault(event, []).append(g)
+                    for e in g["hooks"]:
+                        if e["command"] in existing:
+                            continue
+                        target = next((x for x in cur_groups if x.get("matcher") == g.get("matcher")
+                                       and any("claude/hooks/" in y.get("command", "") for y in x.get("hooks", []))), None)
+                        if target is None:
+                            target = {**({"matcher": g["matcher"]} if g.get("matcher") else {}), "hooks": []}
+                            cur_groups.append(target)
+                        target["hooks"].append(e)
+                        existing.add(e["command"])
         elif isinstance(val, dict):
             cur.setdefault(k, {}).update({kk: vv for kk, vv in val.items() if kk not in cur[k]})
         else:
@@ -283,6 +315,10 @@ def main(argv):
     except PlanError as e:
         print(f"PLAN ERROR: {e}", file=sys.stderr)
         return 2
+    known = manifest.get("files", {})
+    will_skip = {rel for rel in owned if os.path.exists(os.path.join(target, rel))
+                 and (rel not in known or rel in SEED_FILES)}
+    missing = [m for m in missing if m.split(": ")[0] not in will_skip]
     if missing:
         print("PLAN ERROR: missing variables (set them in plan.vars, or 'n/a'):\n  " + "\n  ".join(missing), file=sys.stderr)
         return 2
@@ -297,7 +333,6 @@ def main(argv):
             return 2
         return 0
 
-    known = manifest.get("files", {})
     actions, writes, new_files = [], {}, {}
     for rel, (template, text) in sorted(owned.items()):
         cur = read(os.path.join(target, rel))
@@ -305,6 +340,10 @@ def main(argv):
         if cur is None:
             actions.append(("CREATE", rel, ""))
             writes[rel] = text
+        elif rel in SEED_FILES:
+            actions.append(("KEEP-SEED", rel, "created once; yours to maintain") if rel in known
+                           else ("SKIP", rel, "exists; kept as is"))
+            new_files.pop(rel)
         elif rel not in known:
             actions.append(("SKIP", rel, "exists and was not generated by this plugin; merge by hand"))
             new_files.pop(rel)

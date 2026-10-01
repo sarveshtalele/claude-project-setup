@@ -42,7 +42,7 @@ FRAMEWORKS = {  # dependency name -> framework label
 }
 FRONTEND = {"nextjs", "react", "vue", "nuxt", "angular", "svelte", "sveltekit", "solid", "astro",
             "jquery", "streamlit", "electron", "react-native", "expo"}
-TEST_DIR_NAMES = {"test", "tests", "__tests__", "spec", "specs", "e2e", "cypress"}
+TEST_DIR_NAMES = {"test", "tests", "__tests__", "spec", "e2e", "cypress"}
 TEST_FILE_RE = re.compile(r"(\.test\.|\.spec\.|_test\.|^test_.*\.py$)")
 
 
@@ -152,7 +152,8 @@ def scan(root, threshold=150):
         "root": root,
         "mode": "brownfield" if source else "greenfield",
         "is_git": is_git,
-        "git_remote_host": re.sub(r"^(https?://|git@)([^/:]+).*$", r"\2", remote) if remote else None,
+        "git_remote_host": (re.match(r"^(?:https?://|ssh://)?(?:[^@/]+@)?([^/:]+)[/:]", remote).group(1)
+                            if re.match(r"^(https?://|ssh://|git@)", remote) else None),
         "total_files": len(files),
         "source_files": len(source),
         "languages": dict(langs.most_common()),

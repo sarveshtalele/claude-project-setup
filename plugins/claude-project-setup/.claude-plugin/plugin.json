@@ -1,7 +1,7 @@
 {
   "name": "claude-project-setup",
   "displayName": "Claude Project Setup",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Set up any greenfield or brownfield project for Claude Code from one editable brief: clarifying interview, root and per-module CLAUDE.md, project-specific subagents and hooks, enforced guardrails, plugin/MCP integration, and context that survives /clear and compaction.",
   "author": { "name": "Sarvesh Talele" },
   "homepage": "https://github.com/sarveshtalele/claude-project-setup",

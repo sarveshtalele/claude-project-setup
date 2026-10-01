@@ -6,6 +6,7 @@ Exit 1 if any FAIL.
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -109,6 +110,16 @@ def check(project, tools=False):
         unreg = [h for h in sorted(os.listdir(hooks_dir)) if h.endswith(".py") and h != "selftest.py" and h not in registered]
         add("PASS" if not unreg else "WARN", "hooks registered", "all hook files registered" if not unreg else f"not registered: {', '.join(unreg)}",
             "re-run render.py")
+
+    # strict-level test hook must be runnable from a plain shell
+    tos = os.path.join(hooks_dir, "test_on_stop.py")
+    if os.path.exists(tos):
+        m = re.search(r'^FAST_TEST_CMD = (".*")$', "\n".join(lines(tos)), re.M)
+        cmd = json.loads(m.group(1)) if m else ""
+        exe = cmd.split()[0] if cmd else ""
+        found = bool(exe) and (shutil.which(exe) or os.path.exists(os.path.join(project, exe)))
+        add("PASS" if found else "FAIL", "test_on_stop command", f"`{exe}` {'found' if found else 'not found on PATH'}",
+            "use a path that works without an activated venv, e.g. .venv/bin/python or uv run")
 
     # MCP secrets
     if os.path.exists(p(".mcp.json")):

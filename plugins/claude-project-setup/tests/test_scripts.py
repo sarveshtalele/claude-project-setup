@@ -199,6 +199,89 @@ def doctor_clean_after_render_and_flags_problems():
 
 
 @test
+def scan_remote_host_and_test_dirs():  # E2E-1, E2E-2
+    t = fresh_repo()
+    touch(t, "docs/superpowers/specs/design.md", "x")
+    touch(t, "tests/test_a.py", "def test_a(): pass")
+    for remote, host in (("/some/local/path", None), ("https://github.com/a/b.git", "github.com"),
+                         ("git@github.com:a/b.git", "github.com"), ("ssh://git@gitlab.com/a/b", "gitlab.com")):
+        sh(["git", "remote", "remove", "origin"], cwd=t)
+        sh(["git", "remote", "add", "origin", remote], cwd=t)
+        d = json.loads(script("scan_repo.py", t).stdout)
+        assert d["git_remote_host"] == host, (remote, d["git_remote_host"])
+    assert d["test_dirs"] == ["tests"], d["test_dirs"]
+
+
+@test
+def level_upgrade_registers_every_new_hook():  # E2E-5
+    t = fresh_repo()
+    render(t, plan("standard"))
+    render(t, plan("strict"))
+    s = json.load(open(os.path.join(t, ".claude/settings.json")))
+    cmds = [h["command"] for ev in s["hooks"].values() for g in ev for h in g["hooks"]]
+    for hook in ("guard", "session_context", "stop_gate", "scope_check", "test_on_stop"):
+        assert sum(hook + ".py" in c for c in cmds) == 1, (hook, cmds)
+    r = script("doctor.py", t)
+    assert "hooks registered | all hook files registered" in r.stdout, r.stdout
+
+
+@test
+def seed_files_are_never_diffed_and_skip_needs_no_vars():  # E2E-4, E2E-6
+    t = fresh_repo()
+    render(t, plan())
+    with open(os.path.join(t, "docs/STATE.md"), "w") as f:
+        f.write("# my state\n")
+    out = render(t, plan()).stdout
+    assert "KEEP-SEED    docs/STATE.md" in out and "KEEP-EDITED  docs/STATE.md" not in out, out
+    u = fresh_repo()
+    touch(u, "docs/ARCHITECTURE.md", "# theirs\n")
+    with open(plan()) as f:
+        p = json.load(f)
+    for k in ("ARCH_OVERVIEW", "ARCH_COMPONENTS", "ARCH_EXTERNAL"):
+        del p["vars"][k]
+    pp = os.path.join(tempfile.mkdtemp(), "p.json")
+    json.dump(p, open(pp, "w"))
+    r = render(u, pp)
+    assert r.returncode == 0, r.stderr
+    assert open(os.path.join(u, "docs/ARCHITECTURE.md")).read() == "# theirs\n"
+
+
+@test
+def plugins_can_be_disabled_per_project():  # E2E-3
+    t = fresh_repo()
+    render(t, plan(plugins={"enable": ["a@m"], "disable": ["ponytail@ponytail"]}))
+    s = json.load(open(os.path.join(t, ".claude/settings.json")))
+    assert s["enabledPlugins"] == {"ponytail@ponytail": False, "a@m": True}, s["enabledPlugins"]
+
+
+@test
+def strict_test_hook_never_passes_silently():  # E2E-8
+    t = fresh_repo()
+    render(t, plan("strict", vars={**json.load(open(plan()))["vars"], "FAST_TEST_CMD": "definitely-not-a-cmd -q"}))
+    touch(t, "src/a.py", "x=1")
+    r = sh([PY, ".claude/hooks/test_on_stop.py"], cwd=t, inp="{}")
+    assert '"block"' in r.stdout and "could not run" in r.stdout, r.stdout + r.stderr
+    d = script("doctor.py", t)
+    assert "FAIL | test_on_stop command" in d.stdout, d.stdout
+
+
+@test
+def agent_frontmatter_stays_valid_yaml():  # E2E-9
+    t = fresh_repo()
+    v = json.load(open(plan()))["vars"]
+    render(t, plan(vars={**v, "RISK_AREAS": "auth: OAuth tokens #1, payments"}))
+    fm = open(os.path.join(t, ".claude/agents/security-reviewer.md")).read().split("\n---", 1)[0]
+    line = next(l for l in fm.splitlines() if l.startswith("description:"))
+    assert line.startswith('description: "') and json.loads(line[len("description: "):]).count("auth: OAuth") == 1, line
+    assert "auth: OAuth tokens #1" in open(os.path.join(t, "CLAUDE.md")).read()
+    for f in os.listdir(os.path.join(t, ".claude/agents")):  # every agent: frontmatter lines are key: value
+        head = open(os.path.join(t, ".claude/agents", f)).read().split("\n---", 1)[0].splitlines()[1:]
+        for l in head:
+            k, _, val = l.partition(": ")
+            assert k and (": " not in val or val.startswith('"')), (f, l)
+
+
+@test
 def upgrade_from_manifest_without_plan():
     t = fresh_repo()
     render(t, plan())
