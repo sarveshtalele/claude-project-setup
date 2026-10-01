@@ -1,0 +1,1088 @@
+{
+  "evals": [
+    {
+      "name": "register machine and read initial state",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "t1",
+            "--definition",
+            "{skill}/evals/fixtures/simple.json",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "initialized": true,
+            "current_state": "A"
+          }
+        },
+        {
+          "cmd": [
+            "query_state.py",
+            "--id",
+            "t1",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "current_state": "A"
+          }
+        }
+      ]
+    },
+    {
+      "name": "apply a legal transition",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "t1",
+            "--definition",
+            "{skill}/evals/fixtures/simple.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "t1",
+            "--on",
+            "go",
+            "--to",
+            "B",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "applied": true,
+            "to": "B"
+          }
+        },
+        {
+          "cmd": [
+            "query_state.py",
+            "--id",
+            "t1",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "current_state": "B"
+          }
+        }
+      ]
+    },
+    {
+      "name": "reject an illegal transition and make no changes",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "t1",
+            "--definition",
+            "{skill}/evals/fixtures/simple.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "t1",
+            "--on",
+            "go",
+            "--to",
+            "Z",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_exit": 3
+        },
+        {
+          "cmd": [
+            "query_state.py",
+            "--id",
+            "t1",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "current_state": "A"
+          }
+        }
+      ]
+    },
+    {
+      "name": "reject a transition with an unmet guard",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "g1",
+            "--definition",
+            "{skill}/evals/fixtures/guarded.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "g1",
+            "--on",
+            "advance",
+            "--to",
+            "NEXT.STATE",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_exit": 4
+        },
+        {
+          "cmd": [
+            "query_state.py",
+            "--id",
+            "g1",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "current_state": "GATE.PENDING"
+          }
+        }
+      ]
+    },
+    {
+      "name": "guard satisfied by a recorded event allows the transition",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "g1",
+            "--definition",
+            "{skill}/evals/fixtures/guarded.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "g1",
+            "--on",
+            "approved",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "applied": false,
+            "recorded_event": true
+          }
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "g1",
+            "--on",
+            "advance",
+            "--to",
+            "NEXT.STATE",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "applied": true,
+            "to": "NEXT.STATE"
+          }
+        }
+      ]
+    },
+    {
+      "name": "resume reconstructs state purely from events.jsonl",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "t1",
+            "--definition",
+            "{skill}/evals/fixtures/simple.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "t1",
+            "--on",
+            "go",
+            "--to",
+            "B",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "resume.py",
+            "--id",
+            "t1",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "recomputed_state": "B",
+            "match": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "a held lock fails fast without corrupting state",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "t1",
+            "--definition",
+            "{skill}/evals/fixtures/simple.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "mkfile": ".state-machine/t1/.lock"
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "t1",
+            "--on",
+            "go",
+            "--to",
+            "B",
+            "--state-dir",
+            "{tmp}",
+            "--lock-timeout",
+            "0.2"
+          ],
+          "expect_exit": 2
+        }
+      ]
+    },
+    {
+      "name": "stateDescriptions accepted and rejected correctly",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "d1",
+            "--definition",
+            "{skill}/evals/fixtures/described.json",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "initialized": true,
+            "current_state": "DRAFT"
+          }
+        }
+      ]
+    },
+    {
+      "name": "render_reports.py writes progress.md with the state description",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "d1",
+            "--definition",
+            "{skill}/evals/fixtures/described.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "render_reports.py",
+            "--id",
+            "d1",
+            "--state-dir",
+            "{tmp}",
+            "--progress-out",
+            "{tmp}/progress.md",
+            "--changelog-out",
+            "{tmp}/changelog.md"
+          ],
+          "expect_json": {
+            "ok": true
+          }
+        },
+        {
+          "expect_file_contains": [
+            {
+              "path": "{tmp}/progress.md",
+              "contains": [
+                "DRAFT",
+                "Being written, not yet ready for review."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "render_reports.py writes changelog.md listing every transition",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "d1",
+            "--definition",
+            "{skill}/evals/fixtures/described.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "d1",
+            "--on",
+            "submit",
+            "--to",
+            "REVIEW",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "render_reports.py",
+            "--id",
+            "d1",
+            "--state-dir",
+            "{tmp}",
+            "--progress-out",
+            "{tmp}/progress.md",
+            "--changelog-out",
+            "{tmp}/changelog.md"
+          ]
+        },
+        {
+          "expect_file_contains": [
+            {
+              "path": "{tmp}/changelog.md",
+              "contains": [
+                "submit",
+                "DRAFT",
+                "REVIEW"
+              ]
+            },
+            {
+              "path": "{tmp}/progress.md",
+              "contains": [
+                "REVIEW",
+                "Submitted, awaiting reviewer sign-off before publish."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "assert_state passes in an allowed state",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "t1",
+            "--definition",
+            "{skill}/evals/fixtures/simple.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "assert_state.py",
+            "--id",
+            "t1",
+            "--in",
+            "Z",
+            "--in",
+            "A",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "ok": true,
+            "current_state": "A"
+          }
+        }
+      ]
+    },
+    {
+      "name": "assert_state exits 5 out of order and changes nothing",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "t1",
+            "--definition",
+            "{skill}/evals/fixtures/simple.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "assert_state.py",
+            "--id",
+            "t1",
+            "--in",
+            "B",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_exit": 5
+        },
+        {
+          "cmd": [
+            "query_state.py",
+            "--id",
+            "t1",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "current_state": "A"
+          }
+        },
+        {
+          "expect_absent": ".state-machine/t1/.lock"
+        }
+      ]
+    },
+    {
+      "name": "since_entry guard ignores an event from before the last re-entry",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "l1",
+            "--definition",
+            "{skill}/evals/fixtures/looped.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "l1",
+            "--on",
+            "parity_ok",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "l1",
+            "--on",
+            "retry",
+            "--to",
+            "CAPTURE",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "l1",
+            "--on",
+            "captured",
+            "--to",
+            "REVIEW",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "l1",
+            "--on",
+            "pass",
+            "--to",
+            "DONE",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_exit": 4
+        },
+        {
+          "cmd": [
+            "query_state.py",
+            "--id",
+            "l1",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "current_state": "REVIEW"
+          }
+        }
+      ]
+    },
+    {
+      "name": "since_entry guard accepts an event recorded after the last re-entry",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "l1",
+            "--definition",
+            "{skill}/evals/fixtures/looped.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "l1",
+            "--on",
+            "retry",
+            "--to",
+            "CAPTURE",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "l1",
+            "--on",
+            "captured",
+            "--to",
+            "REVIEW",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "l1",
+            "--on",
+            "parity_ok",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "l1",
+            "--on",
+            "pass",
+            "--to",
+            "DONE",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "applied": true,
+            "to": "DONE"
+          }
+        }
+      ]
+    },
+    {
+      "name": "query_state reports a since_entry guard as unmet after re-entry",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "l1",
+            "--definition",
+            "{skill}/evals/fixtures/looped.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "l1",
+            "--on",
+            "parity_ok",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "l1",
+            "--on",
+            "retry",
+            "--to",
+            "CAPTURE",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "l1",
+            "--on",
+            "captured",
+            "--to",
+            "REVIEW",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "query_state.py",
+            "--id",
+            "l1",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_contains": [
+            "\"guard_satisfied\": false",
+            "\"guard_scope\": \"since_entry\""
+          ]
+        }
+      ]
+    },
+    {
+      "name": "invalid guardScope is rejected at init",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "b1",
+            "--definition",
+            "{skill}/evals/fixtures/bad-scope.json",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_exit": 1
+        }
+      ]
+    },
+    {
+      "name": "force re-init keeps history but resume replays from the reset",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "t1",
+            "--definition",
+            "{skill}/evals/fixtures/simple.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "t1",
+            "--on",
+            "go",
+            "--to",
+            "B",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "t1",
+            "--definition",
+            "{skill}/evals/fixtures/simple.json",
+            "--state-dir",
+            "{tmp}",
+            "--force"
+          ],
+          "expect_json": {
+            "initialized": true,
+            "current_state": "A",
+            "reset": true
+          }
+        },
+        {
+          "cmd": [
+            "resume.py",
+            "--id",
+            "t1",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "recomputed_state": "A",
+            "match": true
+          }
+        },
+        {
+          "expect_file_contains": [
+            {
+              "path": "{tmp}/.state-machine/t1/events.jsonl",
+              "contains": [
+                "\"on\": \"go\"",
+                "\"type\": \"reset\""
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a reset also invalidates guard events from the previous run",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "g1",
+            "--definition",
+            "{skill}/evals/fixtures/guarded.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "g1",
+            "--on",
+            "approved",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "g1",
+            "--definition",
+            "{skill}/evals/fixtures/guarded.json",
+            "--state-dir",
+            "{tmp}",
+            "--force"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "g1",
+            "--on",
+            "advance",
+            "--to",
+            "NEXT.STATE",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_exit": 4
+        }
+      ]
+    },
+    {
+      "name": "a stale lock left by a crashed writer is broken",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "t1",
+            "--definition",
+            "{skill}/evals/fixtures/simple.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "mkfile": ".state-machine/t1/.lock",
+          "age_seconds": 3600
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "t1",
+            "--on",
+            "go",
+            "--to",
+            "B",
+            "--state-dir",
+            "{tmp}",
+            "--lock-timeout",
+            "0.5"
+          ],
+          "expect_json": {
+            "applied": true,
+            "to": "B"
+          }
+        },
+        {
+          "expect_absent": ".state-machine/t1/.lock"
+        }
+      ]
+    },
+    {
+      "name": "regression: after a crash leaves a stale snapshot, transitions follow the event log",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "r",
+            "--definition",
+            "{skill}/evals/fixtures/simple.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "r",
+            "--on",
+            "go",
+            "--to",
+            "B",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "append": ".state-machine/r/events.jsonl",
+          "text": "{\"seq\": 2, \"ts\": \"x\", \"type\": \"transition\", \"on\": \"back\", \"from\": \"B\", \"to\": \"A\", \"data\": {}}\n"
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "r",
+            "--on",
+            "back",
+            "--to",
+            "A",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_exit": 3
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "r",
+            "--on",
+            "go",
+            "--to",
+            "B",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "applied": true,
+            "from": "A"
+          }
+        },
+        {
+          "expect_file_contains": [
+            {
+              "path": "{tmp}/.state-machine/r/events.jsonl",
+              "contains": [
+                "\"seq\": 3"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "regression: a torn last event line is ignored, not fatal",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "r",
+            "--definition",
+            "{skill}/evals/fixtures/simple.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "r",
+            "--on",
+            "go",
+            "--to",
+            "B",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "append": ".state-machine/r/events.jsonl",
+          "text": "{\"seq\": 9, \"ts\": \"x\", \"type\": \"tran"
+        },
+        {
+          "cmd": [
+            "query_state.py",
+            "--id",
+            "r",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "current_state": "B"
+          }
+        }
+      ]
+    },
+    {
+      "name": "regression: commands work when the snapshot file is missing",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "r",
+            "--definition",
+            "{skill}/evals/fixtures/simple.json",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "r",
+            "--on",
+            "go",
+            "--to",
+            "B",
+            "--state-dir",
+            "{tmp}"
+          ]
+        },
+        {
+          "rm": ".state-machine/r/state-snapshot.json"
+        },
+        {
+          "cmd": [
+            "assert_state.py",
+            "--id",
+            "r",
+            "--in",
+            "B",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "ok": true
+          }
+        },
+        {
+          "cmd": [
+            "transition.py",
+            "--id",
+            "r",
+            "--on",
+            "back",
+            "--to",
+            "A",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_json": {
+            "applied": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "regression: machine ids cannot escape the state directory",
+      "steps": [
+        {
+          "cmd": [
+            "init_machine.py",
+            "--id",
+            "../escape",
+            "--definition",
+            "{skill}/evals/fixtures/simple.json",
+            "--state-dir",
+            "{tmp}"
+          ],
+          "expect_exit": 1
+        },
+        {
+          "expect_absent": "escape"
+        }
+      ]
+    }
+  ]
+}

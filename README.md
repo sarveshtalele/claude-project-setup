@@ -9,7 +9,7 @@ Greenfield or brownfield, from one brief, with nothing written until you approve
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757?style=flat-square&logo=claude&logoColor=white)](https://code.claude.com/docs/en/plugins)
 [![Python](https://img.shields.io/badge/python-3.9%2B-3776AB?style=flat-square&logo=python&logoColor=white)](docs/getting-started.md#prerequisites)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-16a34a?style=flat-square)](docs/development.md#conventions)
-[![Tests](https://img.shields.io/badge/tests-17%2F17%20passing-16a34a?style=flat-square)](docs/development.md#test-and-validate)
+[![Tests](https://img.shields.io/badge/tests-21%2F21%20passing-16a34a?style=flat-square)](docs/development.md#test-and-validate)
 [![Platforms](https://img.shields.io/badge/macOS%20%7C%20Linux%20%7C%20Windows-64748b?style=flat-square)](docs/troubleshooting.md)
 [![Last commit](https://img.shields.io/github/last-commit/sarveshtalele/claude-project-setup?style=flat-square)](https://github.com/sarveshtalele/claude-project-setup/commits/main)
 
@@ -43,6 +43,7 @@ flowchart LR
 | 🤖 **Project-specific subagents** | 4 core agents plus specialists, filled in with your real commands and paths |
 | 🛡️ **Guardrails as hooks** | Protected paths, consent before new files, dangerous-shell blocking, task scope; 3 levels |
 | 🧠 **Context that survives** | `STATE.md` is re-injected after `/clear` and compaction |
+| 🔐 **State machines with real approvals** | Setup and tasks follow tracked states; only *your* "approved" unlocks them, and work can't skip verification |
 | 🔌 **Plugins and MCP, reused** | Sorts what you have into REUSE / ADD / SKIP / CONFLICT, with token cost and no literal secrets |
 | 🔁 **Deterministic and upgradable** | Scripts do the work; upgrades never overwrite your edits |
 
@@ -98,7 +99,7 @@ sequenceDiagram
 | Level | Hooks | Best for |
 |---|---|---|
 | 🟢 **light** | guard · session context | Prototypes |
-| 🔵 **standard** *(default)* | + STATE.md stop gate | Most projects |
+| 🔵 **standard** *(default)* | + STATE.md stop gate · approval capture · task state machines | Most projects |
 | 🟣 **strict** | + task-scope check · tests on stop | Production and teams |
 
 ## 📦 What you get
@@ -108,9 +109,10 @@ These are the files generated for a real repo, [tokentelemetry](docs/reports/e2e
 ```mermaid
 pie showData
     title Files generated (standard level)
+    "State machine" : 9
     "Agents" : 7
+    "Hooks" : 5
     "CLAUDE.md (root + 3 modules)" : 4
-    "Hooks" : 4
     "Path-scoped rules" : 3
     "Docs + specs" : 3
     "Skills (/task, /checkpoint)" : 2
@@ -130,6 +132,7 @@ your-project/
     ├── settings.json           permissions · hooks · plugins · no AI attribution
     ├── protected.txt · write-allow.txt
     ├── agents/ · hooks/ · rules/ · skills/
+    ├── state-machine/          task machines + event logs (audit trail)
     └── setup-manifest.json     plan + hashes for safe upgrades
 ```
 
@@ -144,6 +147,7 @@ Everything is committed, so **teammates don't need the plugin**.
 | [Workflow](docs/workflow.md) | Bootstrap step by step, greenfield vs brownfield |
 | [Guardrails](docs/guardrails.md) | Levels, hooks, guard decisions, editable rule files |
 | [Agents](docs/agents.md) | The 9 agent templates, models and when each is added |
+| [State machines](docs/state-machines.md) | Bootstrap and task machines, approvals from your own words, resume |
 | [Integrations](docs/integrations.md) | Plugins and MCP: REUSE / ADD / SKIP / CONFLICT, secrets, permissions |
 | [Context management](docs/context-management.md) | `STATE.md`, session protocol, token savers |
 | [Architecture](docs/architecture.md) | Plugin internals, render file classes, upgrade path |
@@ -151,6 +155,7 @@ Everything is committed, so **teammates don't need the plugin**.
 | [Development](docs/development.md) | Repo layout, tests, validation, release, conventions |
 | [Troubleshooting](docs/troubleshooting.md) | Common symptoms and fixes |
 | [E2E report: tokentelemetry](docs/reports/e2e-tokentelemetry.md) | A full brownfield run, behaviour checks, bugs fixed |
+| [Report: Phases 1–2](docs/reports/phase1-2-state-machines.md) | Tracker bugs found and fixed; state machines tested on tokentelemetry |
 | [Roadmap: v0.4 plan](docs/roadmap/v0.4-plan.md) | Project types, agent model optimisation, state tracking |
 | [Background: session audit](docs/background/session-audit.md) | The 20 findings this plugin is designed to prevent |
 | [Background: playbook](docs/background/playbook.md) | The working method behind the plugin |

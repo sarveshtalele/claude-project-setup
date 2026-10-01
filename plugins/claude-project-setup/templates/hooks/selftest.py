@@ -46,6 +46,9 @@ cases = [
     (write(".env"), "deny"), (write("app/.env.local"), "deny"), (write("package-lock.json"), "deny"),
     (write(".claude/hooks/guard.py"), "deny"), (write("/etc/hosts"), "deny"),
     (write(".claude/protected.txt"), "deny"),
+    (write(".claude/state-machine/.state-machine/TASK-1/events.jsonl"), "deny"),
+    (bash("python3 .claude/state-machine/state_cli.py record TASK-1 user_approved"), "deny"),
+    (bash("rm -rf .claude/state-machine/.state-machine/TASK-1"), "deny"),
     (write(os.path.join(tempfile.gettempdir(), "scratch.txt")), None),
     (write("CLAUDE.md"), None),                      # exists -> normal flow
     (write("random-new-report-9f3.md"), "ask"),      # new, not in write-allow
@@ -93,6 +96,22 @@ if "scope_check" in HAS:
             f.write("## Current task\n- `specs/tasks/TASK-001-x.md`: done\n")
         assert write("src/b.py", "scope_check.py", t) is None
     checked.append("scope_check")
+
+if "approval_capture" in HAS and os.path.exists(os.path.join(PROJECT, ".claude", "state-machine", "state_cli.py")):
+    import shutil
+    with tempfile.TemporaryDirectory() as t:  # approvals come only from the user's own words
+        shutil.copytree(os.path.join(PROJECT, ".claude", "state-machine"), os.path.join(t, ".claude", "state-machine"),
+                        ignore=shutil.ignore_patterns(".state-machine", "__pycache__"))
+        cli = [sys.executable, os.path.join(t, ".claude", "state-machine", "state_cli.py")]
+        env = dict(os.environ, CLAUDE_PROJECT_DIR=t, PYTHONDONTWRITEBYTECODE="1")
+        sm = lambda *a: subprocess.run(cli + list(a), env=env, capture_output=True, text=True).returncode
+        assert sm("new", "TASK-001-x") == 0
+        assert sm("record", "TASK-001-x", "user_approved") == 6          # Claude can't self-approve
+        assert sm("move", "TASK-001-x", "approve") == 4                  # no approval yet
+        assert run("approval_capture.py", {"prompt": "approved but change X"}, t) == ""
+        assert "Recorded" in run("approval_capture.py", {"prompt": "approved"}, t)
+        assert sm("move", "TASK-001-x", "approve") == 0
+    checked.append("approval_capture")
 
 if "test_on_stop" in HAS:
     assert run("test_on_stop.py", {"stop_hook_active": True}) == ""

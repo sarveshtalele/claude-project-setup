@@ -23,3 +23,7 @@ OUT-OF-SCOPE FILES: <list or none>
 NEEDS HUMAN: <list or none>
 ```
 Never write "should pass", "likely works" or similar. Report only what ran.
+
+If `.claude/state-machine/state_cli.py` exists, record the verdict on the task machine (`python3 .claude/state-machine/state_cli.py …`):
+- **PASS** (no out-of-scope files): `record <task-id> verify_passed`, then `move <task-id> pass`.
+- **FAIL:** `move <task-id> fail`.

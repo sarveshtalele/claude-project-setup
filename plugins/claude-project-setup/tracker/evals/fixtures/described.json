@@ -1,0 +1,10 @@
+{
+  "initial": "DRAFT",
+  "stateDescriptions": {
+    "DRAFT": "Being written, not yet ready for review.",
+    "REVIEW": "Submitted, awaiting reviewer sign-off before publish."
+  },
+  "transitions": [
+    {"from": "DRAFT", "on": "submit", "to": "REVIEW"}
+  ]
+}

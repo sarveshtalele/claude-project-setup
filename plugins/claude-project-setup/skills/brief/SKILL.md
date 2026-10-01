@@ -22,8 +22,13 @@ Start from `${CLAUDE_PLUGIN_ROOT}/templates/PROJECT-BRIEF.md` and fill **only** 
 - Every section they didn't cover stays empty or says `recommend`. Those become bootstrap interview questions. **Never guess.**
 
 ## 3. Consent, then write
-- Ask with AskUserQuestion: "Create `PROJECT-BRIEF.md` in the project root?" Options: **Yes (Recommended)** / Different name / Show draft only.
-- Write the file only after a yes. Then show a five-line summary: goal, the number of requirements, the sections left for the interview, and the mode.
+- Ask with AskUserQuestion: "Create `PROJECT-BRIEF.md` and a setup tracker in `.claude/state-machine/`?" Options: **Yes (Recommended)** / Different name / Show draft only.
+- Write the file only after a yes. Then start the setup machine, so the setup can resume after an interruption:
+  ```bash
+  python3 "${CLAUDE_PLUGIN_ROOT}/templates/state-machine/state_cli.py" new bootstrap
+  python3 "${CLAUDE_PLUGIN_ROOT}/templates/state-machine/state_cli.py" move bootstrap brief_written
+  ```
+- Show a five-line summary: goal, the number of requirements, the sections left for the interview, and the mode.
 
 ## 4. Review, then hand off
 - Tell the user they can edit `PROJECT-BRIEF.md` in their editor now, or just answer "go".

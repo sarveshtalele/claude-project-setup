@@ -30,6 +30,8 @@ flowchart LR
 - Implementation needs reliability at reasonable cost, so it runs on **sonnet**.
 - Review and security judgement **inherit** your session model.
 
+**State machine duties** (standard and strict): `implementer` runs `move start` and `move submit`; `verifier` runs `record verify_passed` and `move pass`, or `move fail`.
+
 **Rules every agent follows**
 - It works only inside the task's scope, and stops and reports rather than widening it.
 - A blocked hook gets reported. It never looks for a workaround.

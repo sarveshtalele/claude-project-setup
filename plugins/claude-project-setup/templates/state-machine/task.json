@@ -1,0 +1,41 @@
+{
+  "initial": "PLANNED",
+  "stateDescriptions": {
+    "PLANNED": "Task spec written; waiting for the user's approval.",
+    "APPROVED": "User approved the spec; implementation may start.",
+    "IN_PROGRESS": "Implementer is editing the task's Allowed files.",
+    "VERIFYING": "Verifier is running the acceptance commands.",
+    "DONE": "Acceptance passed in this verification round."
+  },
+  "transitions": [
+    {
+      "from": "PLANNED",
+      "on": "approve",
+      "to": "APPROVED",
+      "guard": "user_approved",
+      "guardScope": "since_entry"
+    },
+    {
+      "from": "APPROVED",
+      "on": "start",
+      "to": "IN_PROGRESS"
+    },
+    {
+      "from": "IN_PROGRESS",
+      "on": "submit",
+      "to": "VERIFYING"
+    },
+    {
+      "from": "VERIFYING",
+      "on": "fail",
+      "to": "IN_PROGRESS"
+    },
+    {
+      "from": "VERIFYING",
+      "on": "pass",
+      "to": "DONE",
+      "guard": "verify_passed",
+      "guardScope": "since_entry"
+    }
+  ]
+}

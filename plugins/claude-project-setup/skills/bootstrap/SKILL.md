@@ -1,56 +1,72 @@
 ---
 name: bootstrap
-description: Set up the current project for Claude Code from PROJECT-BRIEF.md, whether it is new (greenfield) or existing (brownfield). Scans the repo and tools, interviews the user, shows a setup plan, then generates CLAUDE.md files, subagents, hooks, guardrails and plugin/MCP config after approval. Use when the user says bootstrap, set up this project, adopt this repo, or initialise Claude for a project.
+description: Set up the current project for Claude Code from PROJECT-BRIEF.md, whether it is new (greenfield) or existing (brownfield). Scans the repo and tools, interviews the user, shows a setup plan, then generates CLAUDE.md files, subagents, hooks, guardrails, task state machines and plugin/MCP config after approval. Resumes an interrupted setup. Use when the user says bootstrap, set up this project, adopt this repo, or initialise Claude for a project.
 argument-hint: "[path to brief, default PROJECT-BRIEF.md]"
 ---
 
 # Bootstrap
 
-Nothing is written to the project, and nothing is installed, before the user approves the setup plan in step 5.
-Scripts live in `${CLAUDE_PLUGIN_ROOT}/scripts/`. Use `python` instead of `python3` on Windows.
-Keep scratch files in the OS temp dir (`${TMPDIR:-/tmp}`), never in the project.
+Progress lives in the **bootstrap state machine** (`.claude/state-machine/`), so a usage limit, `/clear` or compaction never loses your place.
+`render.py` **refuses** to write the setup until that machine is `APPROVED`, and only the user's own message can approve.
 
-## 1. Scan (deterministic, no exploring by hand)
-Skip this step if `brief` just wrote `${TMPDIR:-/tmp}/cps-scan.json` in this session.
+Below, **`SM`** is shorthand for this command. Type it out in full each time; don't store it in a shell variable, because zsh won't split it:
+`python3 "${CLAUDE_PLUGIN_ROOT}/templates/state-machine/state_cli.py"` (use `python` on Windows).
+Scripts live in `${CLAUDE_PLUGIN_ROOT}/scripts/`. Keep scratch files in `${TMPDIR:-/tmp}`, never in the project.
+
+## 0. Resume or start
+- Run `SM status bootstrap`.
+- **It exists:** continue at the step for its state, and say so in one line:
+  - `SCANNED` → step 2
+  - `BRIEFED` → step 3
+  - `INTERVIEWED` → step 5
+  - `PLANNED` → step 5.4 (re-show the plan)
+  - `APPROVED` → step 6
+  - `GENERATED` → step 7
+  - `VERIFIED` → setup is done; suggest `/claude-project-setup:doctor`
+- **It's `null`:** the `brief` skill creates it. If the brief already exists, ask the user's consent, then run `SM new bootstrap`.
+
+## 1. Scan (deterministic)
+Skip this step if `brief` already wrote `${TMPDIR:-/tmp}/cps-scan.json` in this session.
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/scan_repo.py" . > "${TMPDIR:-/tmp}/cps-scan.json"
 ```
-Read the JSON. It decides `mode` (greenfield or brownfield), lists module candidates and existing instruction files, and shows whether the folder is a git repo.
 
 ## 2. Brief
-Read `$ARGUMENTS`, or `PROJECT-BRIEF.md` if no path was given.
-- Missing: invoke the `claude-project-setup:brief` skill first. It drafts the brief from the user's description and hands control back here.
+- Read `$ARGUMENTS`, or `PROJECT-BRIEF.md` if no path was given. If it's missing, invoke `claude-project-setup:brief` first.
+- If the state is still `SCANNED` once the brief exists: `SM move bootstrap brief_written`.
 
 ## 3. Tool inventory
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/scan_tools.py" . --scan "${TMPDIR:-/tmp}/cps-scan.json" --needs <capabilities from the brief's "Tools & integrations"> > "${TMPDIR:-/tmp}/cps-tools.json"
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/scan_tools.py" . --scan "${TMPDIR:-/tmp}/cps-scan.json" --needs <capabilities from "Tools & integrations"> > "${TMPDIR:-/tmp}/cps-tools.json"
 ```
-The capabilities are `ui-testing`, `library-docs`, `github`, `error-monitoring`, `web-research`, `code-review` and `response-style`. Leave `--needs` out when the brief says "recommend"; the auto-detected needs then apply.
+Capabilities: `ui-testing`, `library-docs`, `github`, `error-monitoring`, `web-research`, `code-review`, `response-style`. Leave out `--needs` when the brief says "recommend".
 
 ## 4. Interview
-Follow [references/interview.md](references/interview.md) exactly: at most 2 rounds of at most 4 AskUserQuestion questions, asking only about gaps and conflicts. Then append every answer to `## Decisions` in the brief as `- <question>: <answer>`.
+- Follow [references/interview.md](references/interview.md): at most 2 rounds of at most 4 AskUserQuestion questions, asking only about gaps and conflicts.
+- Append the answers to `## Decisions` in the brief.
+- Then: `SM move bootstrap answers_recorded`.
 
 ## 5. Setup plan, then approval
-1. Follow [references/greenfield.md](references/greenfield.md) or [references/brownfield.md](references/brownfield.md) (with [references/modules.md](references/modules.md)) to decide the contents.
-2. Write the plan JSON to `${TMPDIR:-/tmp}/cps-plan.json`, following [references/plan.md](references/plan.md) for every field and variable.
-3. Preview it. This exits 2 and lists what is wrong if a variable is missing or a literal secret is present; fix the plan and retry.
-   ```bash
-   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render.py" --target . --plan "${TMPDIR:-/tmp}/cps-plan.json" --dry-run
-   ```
-4. Show the user **one page**:
-   - the dry-run file table
-   - agents, each with the reason it was chosen
-   - hooks with their events, and the guardrail level
+1. Follow [references/greenfield.md](references/greenfield.md) or [references/brownfield.md](references/brownfield.md), plus [references/modules.md](references/modules.md).
+2. Write `${TMPDIR:-/tmp}/cps-plan.json` per [references/plan.md](references/plan.md).
+3. Preview it: `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render.py" --target . --plan "${TMPDIR:-/tmp}/cps-plan.json" --dry-run`. Fix any exit-2 errors first.
+4. Then `SM move bootstrap plan_previewed` (or `plan_changed` if you're re-showing an edited plan), and show **one page** containing:
+   - the file table
+   - agents, each with its reason
+   - hooks and the guardrail level
    - protected paths
-   - plugins and MCP servers, each marked REUSE, ADD, SKIP or CONFLICT, with its token cost
+   - plugins and MCP servers (REUSE/ADD/SKIP/CONFLICT, with token cost)
    - (greenfield) the architecture and the scaffold command
-5. Stop. Continue only after an explicit approval. If they ask for changes, edit the plan and preview again.
+5. End with: **"Reply `approved` to apply this plan, or tell me what to change."** Then stop.
+   - The approval hook records the user's reply. Never record `user_approved` yourself; it is refused.
+   - After they approve, run `SM move bootstrap approve`. Exit 4 means no approval was recorded, so ask again.
+   - If they ask for changes, edit the plan, preview it again, run `SM move bootstrap plan_changed`, and ask again. An earlier approval doesn't cover a changed plan.
 
 ## 6. Generate
-- **Greenfield:** run the approved scaffold command first (see greenfield.md), then confirm each command in the plan's `vars` actually works.
-- Run `render.py` without `--dry-run`.
-- For each file reported as `SKIP` (it exists and wasn't generated by this plugin, typically a root CLAUDE.md), print the generated version with `--show <path>` and merge it by hand with Edit. Show the user the diff, and keep their existing rules.
-- For each **ADD** plugin, ask once per plugin, then run `claude plugin install <id>`. Each new MCP server is already in `.mcp.json`. Tell the user which env vars to set and which servers need `/mcp` sign-in; never enter credentials yourself.
+- **Greenfield:** run the approved scaffold first (see greenfield.md), then confirm each command in `vars` works.
+- Run `render.py` without `--dry-run`. It moves the machine to `GENERATED` itself.
+- For each `SKIP` file (it existed and wasn't generated by the plugin), merge it by hand: print the generated version with `--show <path>`, merge it with Edit, and show the user the diff.
+- **ADD** plugins: ask once per plugin, then run `claude plugin install <id>`. For MCP servers, tell the user which env vars to set and which servers need `/mcp`. Never enter credentials.
 - If the folder isn't a git repo, ask the user, then run `git init`.
 
 ## 7. Verify
@@ -58,4 +74,6 @@ Follow [references/interview.md](references/interview.md) exactly: at most 2 rou
 python3 .claude/hooks/selftest.py
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py" .
 ```
-Both must pass with no FAIL rows. Then ask whether to commit (`chore: claude project setup`). Tell the user to **start a new session** so the new hooks, agents and CLAUDE.md files load. Their first step there is `/task <first requirement>`.
+- Both pass with no FAIL rows: `SM move bootstrap checks_passed`. If not: `SM move bootstrap checks_failed`, fix the problem, and render again.
+- Ask whether to commit (`chore: claude project setup`).
+- Tell the user to **start a new session**, then begin with `/task <first requirement>`.

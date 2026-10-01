@@ -20,7 +20,7 @@ from fnmatch import fnmatch
 ALWAYS_PROTECTED = [  # fnmatch globs on the project-relative POSIX path; "*" crosses "/"
     ".env", ".env.*", "*/.env", "*/.env.*", "*.pem", "*.key", "*secrets/*",
     ".git/*", ".claude/settings.json", ".claude/hooks/*", ".claude/protected.txt",
-    ".claude/setup-manifest.json",
+    ".claude/setup-manifest.json", ".claude/state-machine/.state-machine/*", ".claude/state-machine/tracker/*",
     "package-lock.json", "*/package-lock.json", "pnpm-lock.yaml", "*/pnpm-lock.yaml",
     "yarn.lock", "*/yarn.lock", "poetry.lock", "uv.lock", "Cargo.lock",
 ]
@@ -38,6 +38,8 @@ BASH_DENY = [
     (r"\b(npm|pnpm|yarn)\s+publish\b", "publishing a package"),
     (r"(>|\btee\b|\bsed\s+-i|\bcp\b|\bmv\b|\brm\b)[^|;&]*\.claude/(settings\.json|hooks/|protected\.txt|setup-manifest\.json)",
      "changing guardrail config from the shell"),
+    (r"\buser_approved\b", "recording the user's approval yourself (only the user's own message can approve)"),
+    (r"(>|\btee\b|\bsed\s+-i|\bcp\b|\bmv\b|\brm\b)[^|;&]*\.state-machine/", "editing state-machine logs directly"),
 ]
 
 BASH_ASK = [

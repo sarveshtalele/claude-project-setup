@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "state-machine-tracker snapshot",
+  "type": "object",
+  "required": ["current_state", "seq", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "current_state": { "type": "string", "minLength": 1 },
+    "seq": { "type": "integer", "minimum": 0 },
+    "updated_at": { "type": "string" }
+  }
+}

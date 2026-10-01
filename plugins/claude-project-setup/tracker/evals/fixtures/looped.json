@@ -1,0 +1,8 @@
+{
+  "initial": "REVIEW",
+  "transitions": [
+    {"from": "REVIEW", "on": "retry", "to": "CAPTURE"},
+    {"from": "CAPTURE", "on": "captured", "to": "REVIEW"},
+    {"from": "REVIEW", "on": "pass", "to": "DONE", "guard": "parity_ok", "guardScope": "since_entry"}
+  ]
+}

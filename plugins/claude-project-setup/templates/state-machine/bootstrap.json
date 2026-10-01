@@ -1,0 +1,23 @@
+{
+  "initial": "SCANNED",
+  "stateDescriptions": {
+    "SCANNED": "Repository and tools scanned; nothing written to the project except this tracker.",
+    "BRIEFED": "PROJECT-BRIEF.md exists and the user has had the chance to edit it.",
+    "INTERVIEWED": "Clarifying answers recorded under Decisions in the brief.",
+    "PLANNED": "Setup plan previewed with render.py --dry-run; waiting for the user's approval.",
+    "APPROVED": "User approved this exact plan; render.py may write files.",
+    "GENERATED": "render.py wrote the setup.",
+    "VERIFIED": "Hook self-test and doctor passed; setup complete."
+  },
+  "transitions": [
+    {"from": "SCANNED", "on": "brief_written", "to": "BRIEFED"},
+    {"from": "BRIEFED", "on": "answers_recorded", "to": "INTERVIEWED"},
+    {"from": "INTERVIEWED", "on": "plan_previewed", "to": "PLANNED"},
+    {"from": "PLANNED", "on": "plan_changed", "to": "PLANNED"},
+    {"from": "PLANNED", "on": "approve", "to": "APPROVED", "guard": "user_approved", "guardScope": "since_entry"},
+    {"from": "APPROVED", "on": "plan_changed", "to": "PLANNED"},
+    {"from": "APPROVED", "on": "rendered", "to": "GENERATED"},
+    {"from": "GENERATED", "on": "checks_failed", "to": "APPROVED"},
+    {"from": "GENERATED", "on": "checks_passed", "to": "VERIFIED"}
+  ]
+}

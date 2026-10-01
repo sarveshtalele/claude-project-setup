@@ -1,0 +1,6 @@
+{
+  "initial": "GATE.PENDING",
+  "transitions": [
+    {"from": "GATE.PENDING", "on": "advance", "to": "NEXT.STATE", "guard": "approved"}
+  ]
+}

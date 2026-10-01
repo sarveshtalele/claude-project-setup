@@ -2,6 +2,15 @@
 
 All notable changes to this project. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versions follow [SemVer](https://semver.org/).
 
+## [Unreleased]
+### Added
+- State machines (roadmap phases 1–2). The bootstrap machine makes setup resumable, and `render.py` refuses a first-time setup until it's `APPROVED`. Each `/task` gets a task machine (`PLANNED → APPROVED → IN_PROGRESS → VERIFYING → DONE`) at the standard and strict levels.
+- `approval_capture` hook: `user_approved` is recorded only from the user's own message. `state_cli` refuses it, and `guard.py` blocks it in the shell.
+- `scope_check` reads the task machine (with a `STATE.md` fallback). The verifier and implementer record transitions.
+- Tracker vendored into `tracker/`, with 4 bug fixes (stale-snapshot bypass, torn last line, missing snapshot, id path traversal) and regression evals.
+### Fixed
+- Scan no longer counts dot-folder tooling (`.claude/`, `.github/`) as project source.
+
 ## [0.3.0] - 2026-10-01
 ### Added
 - Auto-invocation: describing a project in chat triggers `brief`, which drafts `PROJECT-BRIEF.md` (with consent) and hands off to `bootstrap`.

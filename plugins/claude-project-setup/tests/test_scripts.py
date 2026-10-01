@@ -12,8 +12,8 @@ PY = sys.executable
 results = []
 
 
-def sh(args, cwd=None, inp=None):
-    return subprocess.run(args, cwd=cwd, input=inp, capture_output=True, text=True)
+def sh(args, cwd=None, inp=None, env=None):
+    return subprocess.run(args, cwd=cwd, input=inp, capture_output=True, text=True, env=env)
 
 
 def script(name, *args, cwd=None):
@@ -103,7 +103,32 @@ def tools_classify_reuse_add_skip_conflict():
     assert d["total_always_on_tokens"] == 1026, d["total_always_on_tokens"]
 
 
-def render(t, p, *extra):
+CLI = os.path.join(HERE, "..", "templates", "state-machine", "state_cli.py")
+HOOK = os.path.join(HERE, "..", "templates", "hooks", "approval_capture.py")
+
+
+def sm(t, *args):
+    return sh([PY, CLI, *args], cwd=t, env=dict(os.environ, CLAUDE_PROJECT_DIR=t, PYTHONDONTWRITEBYTECODE="1"))
+
+
+def say(t, prompt, *flags):  # the user typing a message (UserPromptSubmit hook)
+    return sh([PY, HOOK, *flags], cwd=t, inp=json.dumps({"prompt": prompt}),
+              env=dict(os.environ, CLAUDE_PROJECT_DIR=t, PYTHONDONTWRITEBYTECODE="1")).stdout
+
+
+def approve_setup(t):
+    if sm(t, "status", "bootstrap").stdout.strip() not in ("[]", "[\n  null\n]"):
+        return
+    sm(t, "new", "bootstrap")
+    for e in ("brief_written", "answers_recorded", "plan_previewed"):
+        sm(t, "move", "bootstrap", e)
+    say(t, "approved", "--plugin")
+    assert sm(t, "move", "bootstrap", "approve").returncode == 0
+
+
+def render(t, p, *extra, approve=True):
+    if approve and "--dry-run" not in extra and "--show" not in extra:
+        approve_setup(t)
     return script("render.py", "--target", t, "--plan", p, *extra)
 
 
@@ -180,15 +205,18 @@ def render_refuses_bad_plans_without_writing():
     for b, msg in ((bad_secret, "literal secret"), (bad_literal, "env var"), (bad_var, "TEST_CMD")):
         r = render(t, b)
         assert r.returncode == 2 and msg in r.stderr, (msg, r.stderr)
-    assert sorted(os.listdir(t)) == [".git"], os.listdir(t)
+    assert sorted(os.listdir(t)) == [".git"] or sorted(os.listdir(t)) == [".claude", ".git"], os.listdir(t)
+    assert not os.path.exists(os.path.join(t, "CLAUDE.md"))
 
 
 @test
 def doctor_clean_after_render_and_flags_problems():
     t = fresh_repo()
+    for i in range(40):  # TypeScript project: .claude/'s Python tooling must not look like a module
+        touch(t, f"src/c{i}.ts", "export {}")
     render(t, plan())
     r = script("doctor.py", t)
-    assert r.returncode == 0 and "0 FAIL" in r.stdout, r.stdout
+    assert r.returncode == 0 and "0 FAIL" in r.stdout and "module .claude" not in r.stdout, r.stdout
     u = tempfile.mkdtemp()
     touch(u, "CLAUDE.md", "\n".join(["x"] * 150))
     touch(u, "AGENTS.md", "\n".join(["y"] * 20))
@@ -291,6 +319,74 @@ def plugin_hint_only_before_setup():
     assert "claude-project-setup:bootstrap" in run()
     render(t, plan())
     assert run() == "", run()
+
+
+@test
+def tracker_evals_pass():
+    r = sh([PY, os.path.join(HERE, "..", "tracker", "scripts", "run_evals.py")],
+           env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+    assert r.returncode == 0 and "23/23" in r.stdout, r.stdout + r.stderr
+
+
+@test
+def setup_refused_until_user_approves_plan():
+    t = fresh_repo()
+    r = render(t, plan(), approve=False)
+    assert r.returncode == 3 and "isn't approved" in r.stderr, r.stderr
+    sm(t, "new", "bootstrap")
+    for e in ("brief_written", "answers_recorded", "plan_previewed"):
+        sm(t, "move", "bootstrap", e)
+    assert sm(t, "record", "bootstrap", "user_approved").returncode == 6      # Claude can't self-approve
+    assert sm(t, "move", "bootstrap", "approve").returncode == 4              # no approval yet
+    for prompt in ("approved but use strict", "what does approved mean here?", "yes", "don't approve yet"):
+        assert say(t, prompt, "--plugin") == "", prompt
+    r = render(t, plan(), approve=False)
+    assert r.returncode == 3 and not os.path.exists(os.path.join(t, "CLAUDE.md")), r.stderr
+    assert "Recorded" in say(t, "approved", "--plugin")
+    sm(t, "move", "bootstrap", "plan_changed")                                # plan edited after approval
+    assert sm(t, "move", "bootstrap", "approve").returncode == 4, "old approval must not cover a changed plan"
+    say(t, "Approved.", "--plugin")
+    assert sm(t, "move", "bootstrap", "approve").returncode == 0
+    assert render(t, plan(), approve=False).returncode == 0
+    st = json.loads(sm(t, "status", "bootstrap").stdout)[0]["state"]
+    assert st == "GENERATED", st
+
+
+@test
+def task_lifecycle_drives_scope_and_done():
+    t = fresh_repo()
+    render(t, plan("strict"))
+    cli = [PY, ".claude/state-machine/state_cli.py"]
+    env = dict(os.environ, CLAUDE_PROJECT_DIR=t, PYTHONDONTWRITEBYTECODE="1")
+    run = lambda *a: sh(cli + list(a), cwd=t, env=env)
+    hook = lambda name, payload: sh([PY, f".claude/hooks/{name}.py"], cwd=t, inp=json.dumps(payload), env=env).stdout
+    scope = lambda f: (json.loads(hook("scope_check", {"tool_name": "Edit", "tool_input": {"file_path": f}}) or "{}")
+                       .get("hookSpecificOutput", {}).get("permissionDecision", "allow"))
+    touch(t, "specs/tasks/TASK-001-csv.md", "# T\n## Allowed files\n- `src/csv.ts`\n## Rollback\nx\n")
+    assert run("new", "TASK-001-csv").returncode == 0
+    assert scope("src/other.ts") == "allow", "PLANNED task must not restrict edits yet"
+    assert run("move", "TASK-001-csv", "start").returncode == 3
+    assert "Recorded" in hook("approval_capture", {"prompt": "approve TASK-001"})
+    for e in ("approve", "start"):
+        assert run("move", "TASK-001-csv", e).returncode == 0, e
+    assert scope("src/csv.ts") == "allow" and scope("src/other.ts") == "deny"
+    assert json.loads(run("active").stdout) == ["TASK-001-csv"]
+    run("move", "TASK-001-csv", "submit")
+    assert run("move", "TASK-001-csv", "pass").returncode == 4, "DONE needs verify_passed"
+    run("record", "TASK-001-csv", "verify_passed")
+    assert run("move", "TASK-001-csv", "pass").returncode == 0
+    assert scope("src/other.ts") == "allow" and json.loads(run("active").stdout) == []
+    st = sh([PY, ".claude/hooks/selftest.py"], cwd=t, env=env)
+    assert st.returncode == 0 and "approval_capture" in st.stdout, st.stdout + st.stderr
+
+
+@test
+def light_level_has_no_state_machines():
+    t = fresh_repo()
+    render(t, plan("light"))
+    assert not os.path.exists(os.path.join(t, ".claude/state-machine/state_cli.py"))
+    s = json.load(open(os.path.join(t, ".claude/settings.json")))
+    assert "UserPromptSubmit" not in s["hooks"], s["hooks"].keys()
 
 
 @test

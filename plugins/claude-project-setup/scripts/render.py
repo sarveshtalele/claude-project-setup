@@ -16,6 +16,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -26,9 +27,12 @@ SECRET = re.compile(r"(sk-[A-Za-z0-9_-]{16,}|ghp_[A-Za-z0-9]{20,}|github_pat_\w{
                     r"|AKIA[0-9A-Z]{16}|eyJ[\w-]{15,}\.[\w-]{10,}|glpat-[\w-]{20,})")
 LEVELS = {
     "light": ["guard", "session_context"],
-    "standard": ["guard", "session_context", "stop_gate"],
-    "strict": ["guard", "session_context", "stop_gate", "scope_check", "test_on_stop"],
+    "standard": ["guard", "session_context", "stop_gate", "approval_capture"],
+    "strict": ["guard", "session_context", "stop_gate", "approval_capture", "scope_check", "test_on_stop"],
 }
+TRACKED_LEVELS = {"standard", "strict"}  # task state machines + approval capture
+TRACKER_FILES = ["_common.py", "init_machine.py", "transition.py", "assert_state.py", "query_state.py",
+                 "resume.py", "render_reports.py"]
 HOOK_EVENTS = {  # hook -> (event, matcher)
     "session_context": ("SessionStart", "startup|resume|clear|compact"),
     "guard": ("PreToolUse", "Write|Edit|MultiEdit|NotebookEdit|Bash"),
@@ -36,10 +40,12 @@ HOOK_EVENTS = {  # hook -> (event, matcher)
     "format_on_edit": ("PostToolUse", "Write|Edit|MultiEdit"),
     "stop_gate": ("Stop", None),
     "test_on_stop": ("Stop", None),
+    "approval_capture": ("UserPromptSubmit", None),
 }
 CORE_AGENTS = ["explorer", "implementer", "verifier", "reviewer"]
 SEED_FILES = {"docs/STATE.md", "docs/ARCHITECTURE.md"}  # created once, then owned by the user
-GITIGNORE_REQUIRED = [".env", ".env.*", "!.env.example", "CLAUDE.local.md", ".claude/settings.local.json"]
+GITIGNORE_REQUIRED = [".env", ".env.*", "!.env.example", "CLAUDE.local.md", ".claude/settings.local.json",
+                      ".claude/state-machine/.state-machine/*/.lock", ".claude/state-machine/.state-machine/*/*.tmp"]
 
 
 class PlanError(Exception):
@@ -49,6 +55,22 @@ class PlanError(Exception):
 def version():
     with open(os.path.join(PLUGIN, ".claude-plugin", "plugin.json"), encoding="utf-8") as f:
         return json.load(f)["version"]
+
+
+def read_plugin(rel):
+    with open(os.path.join(PLUGIN, rel), encoding="utf-8") as f:
+        return f.read()
+
+
+def bootstrap_state(target):
+    """Current state of the project's setup machine, replayed from its event log (None if absent)."""
+    sys.path.insert(0, os.path.join(PLUGIN, "tracker", "scripts"))
+    import _common as c
+    from pathlib import Path
+    d = Path(target) / ".claude" / "state-machine" / ".state-machine" / "bootstrap"
+    if not (d / "machine.json").exists():
+        return None
+    return c.replay_state(c.load_json(d / "machine.json"), c.read_events(d / "events.jsonl"))
 
 
 def tpl(rel):
@@ -185,6 +207,11 @@ def build(plan, target):
         add(f".claude/rules/{template}.md", f"rules/{template}.md", extra)
     for s in ("task", "checkpoint"):
         add(f".claude/skills/{s}/SKILL.md", f"skills/{s}/SKILL.md")
+    if level in TRACKED_LEVELS:  # task state machines: tracker + definition + CLI, copied verbatim
+        add(".claude/state-machine/state_cli.py", "state-machine/state_cli.py")
+        add(".claude/state-machine/task.json", "state-machine/task.json")
+        for f in TRACKER_FILES:
+            owned[f".claude/state-machine/tracker/scripts/{f}"] = (f"tracker/scripts/{f}", read_plugin(f"tracker/scripts/{f}"))
     add(".claude/protected.txt", "protected.txt", {"PROTECTED_LINES": plan.get("protected", [])})
     add(".claude/write-allow.txt", "write-allow.txt", {"WRITE_ALLOW_LINES": plan.get("write_allow", [])})
 
@@ -373,6 +400,14 @@ def main(argv):
           f"{sum(1 for a in actions if a[0] == 'KEEP-EDITED')} kept (edited).")
     if dry:
         return 0
+    first_setup = not known
+    if first_setup and "--plan" in flags:
+        st = bootstrap_state(target)
+        if st != "APPROVED":
+            print(f"REFUSED: the setup plan isn't approved yet (bootstrap state: {st or 'not started'}). "
+                  "The user must reply 'approved' to the setup plan; the approval hook records it, then run "
+                  "`state_cli.py move bootstrap approve`.", file=sys.stderr)
+            return 3
     for rel, text in writes.items():
         path = os.path.join(target, rel)
         os.makedirs(os.path.dirname(path) or target, exist_ok=True)
@@ -383,6 +418,10 @@ def main(argv):
         json.dump({"generator": "claude-project-setup", "version": version(), "plan": plan,
                    "files": new_files}, f, indent=2)
         f.write("\n")
+    if bootstrap_state(target) == "APPROVED":
+        cli = os.path.join(TPL, "state-machine", "state_cli.py")
+        subprocess.run([sys.executable, cli, "move", "bootstrap", "rendered"], cwd=target, capture_output=True,
+                       env=dict(os.environ, CLAUDE_PROJECT_DIR=target, PYTHONDONTWRITEBYTECODE="1"))
     return 0
 
 

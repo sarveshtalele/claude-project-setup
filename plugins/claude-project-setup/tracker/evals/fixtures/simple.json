@@ -1,0 +1,7 @@
+{
+  "initial": "A",
+  "transitions": [
+    {"from": "A", "on": "go", "to": "B"},
+    {"from": "B", "on": "back", "to": "A"}
+  ]
+}

@@ -14,6 +14,15 @@
 | `/task <title>` | One-page task spec with allowed files and runnable acceptance checks; waits for approval |
 | `/checkpoint` | Rewrites `docs/STATE.md` (≤ 60 lines); tells you whether `/clear` is safe |
 
+## State machines (standard and strict levels)
+| Command | Does |
+|---|---|
+| `python3 .claude/state-machine/state_cli.py status [id]` | Current state and legal next moves |
+| `… active` | Tasks in progress |
+| `… move <id> <event>` | Applies a transition (used by skills and agents) |
+| `… record <id> <event>` | Records an event; `user_approved` is refused |
+| `… report <id>` | Writes progress.md and changelog.md |
+
 ## Scripts (run from the project root)
 ```bash
 python3 .claude/hooks/selftest.py

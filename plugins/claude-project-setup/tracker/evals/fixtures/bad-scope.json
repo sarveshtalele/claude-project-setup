@@ -1,0 +1,6 @@
+{
+  "initial": "A",
+  "transitions": [
+    {"from": "A", "on": "go", "to": "B", "guard": "x", "guardScope": "sometimes"}
+  ]
+}

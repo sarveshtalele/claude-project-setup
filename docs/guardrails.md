@@ -18,7 +18,7 @@ flowchart TB
 | Level | Hooks | Use when |
 |---|---|---|
 | **light** | guard · session_context | Prototypes, solo experiments |
-| **standard** (default) | + stop_gate | Most projects |
+| **standard** (default) | + stop_gate · approval_capture · task state machines | Most projects |
 | **strict** | + scope_check · test_on_stop | Production code, teams, regulated areas |
 
 `format_on_edit` is a separate yes/no choice. `selftest.py` is always installed.
@@ -30,7 +30,8 @@ flowchart TB
 | `guard.py` | PreToolUse: Write, Edit, MultiEdit, NotebookEdit, Bash | Denies protected paths and dangerous shell; asks before new files and installs |
 | `session_context.py` | SessionStart: startup, resume, clear, compact | Injects `docs/STATE.md` and git status |
 | `stop_gate.py` | Stop | Blocks once if code changed after STATE.md was last updated |
-| `scope_check.py` | PreToolUse: Write, Edit, MultiEdit | Denies edits outside the active task's Allowed files |
+| `approval_capture.py` | UserPromptSubmit | Records `user_approved` from **your** message ("approved", "approve TASK-007"); see [State machines](state-machines.md) |
+| `scope_check.py` | PreToolUse: Write, Edit, MultiEdit | Denies edits outside the Allowed files of the task in progress (read from the task machine) |
 | `test_on_stop.py` | Stop | Runs `FAST_TEST_CMD`; a failure (or a command that can't run) blocks once |
 | `format_on_edit.py` | PostToolUse: Write, Edit, MultiEdit | Runs your formatter on the edited file only; never blocks |
 
@@ -57,6 +58,7 @@ flowchart LR
 | `rm -rf /`, `~` or `..`; `sudo`; `curl \| sh`; `chmod -R 777` | `git commit` (permission rule) |
 | `git push --force`, `reset --hard`, `clean -f`, `--no-verify` | `claude plugin install`, `claude mcp add` |
 | `npm publish`; reading `.env`; shell writes to guardrail files | WebFetch |
+| Shell commands containing `user_approved`; edits to `.state-machine/` logs | |
 
 ## Files you edit
 
@@ -75,4 +77,4 @@ flowchart LR
 ```bash
 python3 .claude/hooks/selftest.py
 ```
-Expected: a line starting with `OK: <n> guard cases` (24 built-in checks, plus one per glob in your `protected.txt`), listing the hooks checked at your level.
+Expected: a line starting with `OK: <n> guard cases` (27 built-in checks, plus one per glob in your `protected.txt`), listing the hooks checked at your level.

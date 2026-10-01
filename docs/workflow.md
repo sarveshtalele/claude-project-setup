@@ -18,15 +18,19 @@ sequenceDiagram
     U->>C: Answers (or defaults)
     C->>S: render.py --dry-run
     S-->>C: exact file list
-    C->>U: Setup plan
-    U->>C: Approved
-    C->>S: render.py
+    C->>U: Setup plan. Reply "approved"
+    U->>C: approved
+    Note over U,C: approval hook records user_approved from your message
+    C->>S: state_cli move bootstrap approve
+    C->>S: render.py (refuses unless APPROVED)
     S->>P: CLAUDE.md files, agents, hooks, settings, .mcp.json
     C->>S: selftest.py + doctor.py
     S-->>U: PASS table
 ```
 
 ## Step by step
+
+**0. Resume.** Every step is a transition of the bootstrap state machine. After an interruption, the next session's start hook says where to resume.
 
 **1. Trigger**
 - You describe a project in chat. The plugin's `brief` skill matches on its description.
@@ -53,7 +57,10 @@ sequenceDiagram
 - Claude writes a plan JSON (schema: [plan.md](../plugins/claude-project-setup/skills/bootstrap/references/plan.md)). Every command in it is run once first.
 - `render.py --dry-run` shows the exact CREATE, MERGE and SKIP list.
 
-**7. Approve**: nothing has been written or installed yet.
+**7. Approve**: reply `approved`. Nothing has been written or installed yet.
+- The approval hook records your reply. Claude can't record it for you.
+- `render.py` refuses a first-time setup until the bootstrap machine is `APPROVED`.
+- If the plan changes, you approve again. Details: [State machines](state-machines.md).
 
 **8. Generate**
 - Greenfield: the official scaffold runs first (`npm create vite`, `create-next-app`, `uv init`…).

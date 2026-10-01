@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "state-machine-tracker event (one line of events.jsonl)",
+  "type": "object",
+  "required": [
+    "seq",
+    "ts",
+    "type",
+    "on"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "seq": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "ts": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "transition",
+        "event",
+        "reset"
+      ]
+    },
+    "on": {
+      "type": "string",
+      "minLength": 1
+    },
+    "from": {
+      "type": "string"
+    },
+    "to": {
+      "type": "string"
+    },
+    "data": {
+      "type": "object"
+    }
+  }
+}

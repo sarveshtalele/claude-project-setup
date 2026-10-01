@@ -19,7 +19,7 @@ flowchart LR
 
 - **One task per session.** When a task is done, run `/checkpoint`, then `/clear`.
 - **Plan first.** Any change touching more than one file goes through `/task`.
-- **Approve explicitly.** Nothing is implemented until you say "approved".
+- **Approve explicitly.** Reply `approved` (or `approve TASK-007`). A hook records it from **your** message, and Claude can't approve for you.
 - **Trust output, not claims.** The verifier quotes real command output; "should pass" is never accepted.
 
 ## 1. Describe → brief
@@ -51,7 +51,9 @@ flowchart LR
   - It splits mixed requests and asks which goal comes first.
   - It writes `specs/tasks/TASK-NNN-*.md` with **Allowed files**, **Non-goals** and **Acceptance commands**.
 - After you approve: implementer → verifier → reviewer.
-- At **strict** level, edits outside the task's Allowed files are blocked by a hook.
+- Each task has a state machine: `PLANNED → APPROVED → IN_PROGRESS → VERIFYING → DONE`. It can't reach `DONE` until the verifier records a pass.
+- At **strict** level, edits outside the Allowed files of the task in progress are blocked by a hook.
+- Check where things stand: `python3 .claude/state-machine/state_cli.py status`.
 
 ## 4. Keep context
 - `docs/STATE.md` (≤ 60 lines) is the project's memory. It's injected at start, resume, `/clear` and compaction.

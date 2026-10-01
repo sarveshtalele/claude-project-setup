@@ -103,7 +103,8 @@ def git_remote(root):
 def scan(root, threshold=150):
     root = os.path.realpath(root)
     files, is_git = list_files(root)
-    source = [f for f in files if os.path.splitext(f)[1] in LANG]
+    # tooling dirs (.claude/, .github/, …) hold hooks and scripts, not project source
+    source = [f for f in files if os.path.splitext(f)[1] in LANG and not f.split("/")[0].startswith(".")]
     langs = Counter(LANG[os.path.splitext(f)[1]] for f in source)
     manifests = [{"path": f, "kind": MANIFESTS[f.rsplit("/", 1)[-1]]} for f in files
                  if f.rsplit("/", 1)[-1] in MANIFESTS]
