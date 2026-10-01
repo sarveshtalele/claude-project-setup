@@ -23,7 +23,7 @@ def bootstrap_status():
 if not os.path.exists(os.path.join(project, ".claude", "setup-manifest.json")):
     st = bootstrap_status()
     if st:
-        print(f"Claude Project Setup was interrupted at state {st['state']} ({st['description']}). "
+        print(f"Claude Project Setup was interrupted at state {st['state']} ({st['description'].rstrip('.')}). "
               "Resume with the claude-project-setup:bootstrap skill; it continues from this state.")
     elif os.path.exists(os.path.join(project, "PROJECT-BRIEF.md")):
         print("Claude Project Setup is installed and PROJECT-BRIEF.md exists: when the user wants to start, "

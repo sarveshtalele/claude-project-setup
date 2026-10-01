@@ -24,6 +24,7 @@ Exit code `2` means the plan is invalid (missing variable, unknown template, lit
 | `scan_repo.py [ROOT]` | Files (respects `.gitignore`) | JSON: mode, stack, modules, instructions |
 | `scan_tools.py [ROOT] --scan --needs` | `claude` CLI, `.mcp.json`, catalog | JSON: REUSE/ADD/SKIP/CONFLICT, token cost |
 | `render.py --target --plan [--dry-run] [--show]` | Plan JSON, or the manifest | Files + `.claude/setup-manifest.json` |
+| `adopt_scaffold.py <dir> [--target] [--dry-run]` | A generator's output in a temp folder | Moved into the project; `.gitignore` merged; refuses collisions |
 | `scaffold.py --spec --target [--dry-run]` | Skill or plugin spec JSON | A skill (with machine, evals and tracker) or a plugin bundle; never overwrites |
 | `doctor.py [ROOT] [--tools]` | The project | PASS/WARN/FAIL table; exits 1 on any FAIL |
 | `hint.py` | `CLAUDE_PROJECT_DIR` | One line before setup, or "resume at <state>"; silent after |

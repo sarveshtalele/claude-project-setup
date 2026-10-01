@@ -3,22 +3,21 @@
 <!-- Keep under 60 lines. Injected into every session at start and after compaction.
      Overwrite stale lines; don't append history (that's git log + CHANGELOG). -->
 
-**Goal:** <the outcome the project exists for, in one line>
-**Updated:** <YYYY-MM-DD> by <session/task>
+**Goal:** {{STATE_GOAL}}
+**Updated:** {{STATE_DATE}} by claude-project-setup
 
 ## Current task
-- `specs/tasks/TASK-NNN-<slug>.md`: <status: planned | approved | in progress | verifying>
-- Next step: <the single next action>
+- none
+- Next step: {{STATE_NEXT}}
 
 ## Architecture (now)
-- <component>: <one line>
-- Decisions: see `docs/adr/` (latest: ADR-NNNN <title>)
+- See `docs/ARCHITECTURE.md` and `docs/adr/`.
 
 ## Done (recent, max 5)
-- TASK-NNN <title>: verified by `<command>`
+- Claude setup (level: {{GUARDRAIL_LEVEL}}): verified by `python3 .claude/hooks/selftest.py`
 
 ## Open questions / blocked on user
-- <question>
+- none
 
 ## Known gaps (not yet tasks)
-- <gap>: <evidence path:line>
+{{STATE_GAPS}}

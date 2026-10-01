@@ -54,7 +54,7 @@ Step-by-step instructions for setting up any project with Claude Project Setup. 
 4. Open `PROJECT-BRIEF.md` in your editor. Check that each requirement is one line with one goal. Fill in anything you know: stack, risk areas (for example auth, PII), protected areas, guardrail level, outputs folder. Leave the rest as `recommend`.
 5. Reply **go**. Claude scans the folder and your installed plugins and MCP servers, then asks at most 2 rounds of questions. Pick the recommended option when unsure.
 6. Claude shows the architecture, the scaffold command and the setup plan, which lists every file to create. Read it. Ask for changes if needed; each change produces a new plan.
-7. Reply **approved**. Claude runs the official scaffold, confirms that install, test, lint and build work, and writes the setup.
+7. Reply **approved**. Claude runs the official scaffold in a temporary folder and moves its files in, because generators refuse a folder that already holds the brief. If the template has no test runner, Claude adds one with a first passing test. It then confirms that install, test, lint and build work, and writes the setup.
 8. Claude runs the self-test and `doctor`. Both must pass with no FAIL rows.
 9. Commit when Claude asks (`chore: claude project setup`).
 10. Continue with [After setup](#after-setup).

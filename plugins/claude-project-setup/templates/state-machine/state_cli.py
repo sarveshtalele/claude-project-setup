@@ -97,8 +97,14 @@ def capture_approval(project, prompt, only=None):
     mid = waiting[0]
     code, _, err = _tracker("transition.py", "--id", mid, "--on", APPROVAL_GUARD,
                             "--data", json.dumps({"source": "user-prompt", "text": text[:80]}), project=project)
-    return (f"Recorded the user's approval for `{mid}` from their message. You may now run: "
-            f"state_cli.py move {mid} approve" if code == 0 else f"Could not record approval for {mid}: {err[:200]}")
+    if code != 0:
+        return f"Could not record approval for {mid}: {err[:200]}"
+    if mid.startswith("skill-"):
+        gate = (status(project, mid) or {}).get("state", "").lower()
+        nxt = f"skill_state.py done {gate}"
+    else:
+        nxt = f"state_cli.py move {mid} approve"
+    return f"Recorded the user's approval for `{mid}` from their message. Next: `{nxt}`."
 
 
 def main(argv):

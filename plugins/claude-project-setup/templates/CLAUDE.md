@@ -35,7 +35,7 @@
 - **Escalation:** {{ESCALATION}}
 
 ## Guardrails (level: {{GUARDRAIL_LEVEL}}; enforced by `.claude/settings.json` and `.claude/hooks/`)
-- Paths in `.claude/protected.txt`, secrets, lockfiles, `.git/` and `.claude/` config are never written.
+- Never written: {{PROTECTED_SUMMARY}}; plus secrets, lockfiles, `.git/` and `.claude/` config (`.claude/protected.txt`).
 - No force-push, `reset --hard`, `sudo` or `curl | sh`. Dependency installs and `git push` always ask.
 - If a hook blocks you, report the block and ask. Never work around it.
 - Commits and PRs carry no AI co-author or attribution lines (`attribution` is off in settings) unless the user asks.

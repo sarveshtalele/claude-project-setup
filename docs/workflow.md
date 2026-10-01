@@ -38,7 +38,7 @@
 - If the plan changes, you approve again. Details: [State machines](state-machines.md).
 
 **8. Generate**
-- Greenfield: the official scaffold runs first (`npm create vite`, `create-next-app`, `uv init`…).
+- Greenfield: the official scaffold runs first (`npm create vite`, `create-next-app`, `uv init`…), in a temporary folder; `adopt_scaffold.py` moves its output in. A test runner is added if the template has none.
 - `render.py` writes the files. An existing `CLAUDE.md` is merged by hand, with a diff shown.
 - Each new plugin install needs its own yes.
 

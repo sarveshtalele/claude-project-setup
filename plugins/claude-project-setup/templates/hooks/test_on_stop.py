@@ -23,7 +23,8 @@ def main():
     except Exception:
         return
     changed = [l[3:] for l in porcelain.splitlines() if l.strip()]
-    if not any(not p.startswith(("docs/", "specs/")) and not p.endswith(".md") for p in changed):
+    if not any(not p.startswith(("docs/", "specs/", ".claude/")) and not p.endswith(".md")
+               and p.rsplit("/", 1)[-1] not in (".gitignore", ".mcp.json", ".env.example") for p in changed):
         return
     try:
         r = subprocess.run(shlex.split(FAST_TEST_CMD), cwd=project, capture_output=True, text=True,

@@ -82,6 +82,22 @@ def apply_to_text(text, settings):
     return "---\n" + "\n".join(keep) + text[end:]
 
 
+def sync_claude_md(project, policy, rows):
+    """Keep the Agents list and profile name in CLAUDE.md in step with the policy."""
+    path = os.path.join(project, "CLAUDE.md")
+    if not os.path.exists(path):
+        return
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    new = re.sub(r"\(profile `[\w-]+`\)", f"(profile `{policy['profile']}`)", text)
+    for name, s in rows:
+        if s and s.get("model"):
+            new = re.sub(rf"^(- `{re.escape(name)}` )\([^)]*\)", rf"\g<1>({s['model']})", new, flags=re.M)
+    if new != text:
+        with open(path, "w", encoding="utf-8", newline="\n") as f:
+            f.write(new)
+
+
 def agent_name(text, fallback):
     m = re.search(r"^name:\s*\"?([^\"\n]+)\"?$", text.split("\n---", 1)[0], re.M)
     return m.group(1).strip() if m else fallback
@@ -123,6 +139,7 @@ def main(argv):
         print(json.dumps({"profile": policy["profile"], "differs_from_policy": drift,
                           "unmanaged": [n for n, s in rows if s is None]}))
         return 0
+    sync_claude_md(project, policy, rows)
     print(json.dumps({"profile": policy["profile"], "updated": changed,
                       "unchanged": [n for n, _ in rows if n not in changed]}))
     return 0

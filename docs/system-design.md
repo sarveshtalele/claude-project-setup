@@ -26,7 +26,7 @@ This document describes how Claude Project Setup is built: its components, data 
 | Layer | Component | Location | Responsibility |
 |---|---|---|---|
 | Plugin | Skills | `plugins/claude-project-setup/skills/` | `brief`, `bootstrap`, `doctor`, `integrations`, `create-skill`, `create-agent`, `create-plugin`: guide Claude through each workflow |
-| Plugin | Scripts | `plugins/claude-project-setup/scripts/` | `scan_repo.py`, `scan_tools.py`, `render.py`, `scaffold.py`, `doctor.py`, `hint.py`: all deterministic, standard-library Python |
+| Plugin | Scripts | `plugins/claude-project-setup/scripts/` | `scan_repo.py`, `scan_tools.py`, `render.py`, `scaffold.py`, `adopt_scaffold.py`, `doctor.py`, `hint.py`: all deterministic, standard-library Python |
 | Plugin | Plugin hooks | `plugins/claude-project-setup/hooks/hooks.json` | `SessionStart`: hint or resume message. `UserPromptSubmit`: approval capture before setup |
 | Plugin | Templates | `plugins/claude-project-setup/templates/` | Every file `render.py` and `scaffold.py` can write |
 | Plugin | Tracker | `plugins/claude-project-setup/tracker/` | State machine engine with its own evals |
@@ -153,7 +153,7 @@ See [Development](development.md#adding-things) for where to add an agent templa
 
 ## 11. Testing
 
-- `plugins/claude-project-setup/tests/test_scripts.py`: 28 tests, including the tracker's own 23 evals.
+- `plugins/claude-project-setup/tests/test_scripts.py`: 33 tests, including the tracker's own 23 evals.
 - Every bug fix ships with a regression test, and each regression test was shown to fail without its fix.
-- End-to-end runs on real repositories are recorded in [reports](reports/v0.4-phases.md).
+- End-to-end runs on real repositories are recorded in the reports: [v0.4.2](reports/e2e-v0.4.2.md) and [v0.4 phases](reports/v0.4-phases.md).
 - Not yet covered: a live interactive Claude Code session, and Windows.

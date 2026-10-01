@@ -187,6 +187,9 @@ def build(plan, target):
     level = plan.get("level", "standard")
     if level not in LEVELS:
         raise PlanError(f"level must be one of {list(LEVELS)}")
+    if level == "strict" and str(plan.get("vars", {}).get("FAST_TEST_CMD", "")).strip().lower() in ("", "n/a"):
+        raise PlanError("strict level needs a real FAST_TEST_CMD (tests run before Claude stops); "
+                        "add a test runner, or choose standard")
     py = plan.get("python") or ("python" if os.name == "nt" else "python3")
     catalog = load_catalog()
     mcps = mcp_entries(plan, catalog)
@@ -214,6 +217,7 @@ def build(plan, target):
             mcp_setup += f"- Sign in yourself with `/mcp`: {', '.join(oauth)}.\n"
     computed = {
         "GUARDRAIL_LEVEL": level, "MCP_SETUP": mcp_setup,
+        "PROTECTED_SUMMARY": ", ".join(f"`{g}`" for g in plan.get("protected", [])) or "no project paths",
         "MODULE_MAP": ", ".join(f"`{m['path']}/`" for m in modules) or "single module (see CLAUDE.md Layout)",
     }
     v.update({k: val for k, val in computed.items() if k not in v})
@@ -257,6 +261,11 @@ def build(plan, target):
         add(f"{m['path']}/CLAUDE.md", "CLAUDE.module.md", {"MODULE": m["path"], **m.get("vars", {})})
 
     v.setdefault("AGENTS_LIST", agent_lines)
+    import datetime
+    v.setdefault("STATE_GOAL", v.get("PROJECT_SUMMARY", "see PROJECT-BRIEF.md"))
+    v.setdefault("STATE_DATE", datetime.date.today().isoformat())
+    v.setdefault("STATE_NEXT", plan.get("next_step") or "`/task <first requirement in PROJECT-BRIEF.md>`")
+    v.setdefault("STATE_GAPS", [f"- {g}" for g in plan.get("known_gaps", [])] or ["- none recorded"])
     for path, template in [("CLAUDE.md", "CLAUDE.md"), ("docs/STATE.md", "docs/STATE.md"),
                            ("docs/ARCHITECTURE.md", "docs/ARCHITECTURE.md"),
                            ("docs/adr/0000-template.md", "docs/adr/0000-template.md"),

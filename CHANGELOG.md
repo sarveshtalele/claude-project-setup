@@ -2,6 +2,21 @@
 
 All notable changes to this project. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versions follow [SemVer](https://semver.org/).
 
+## [0.4.2] - 2026-10-02
+End-to-end test of the released 0.4.1 package on tokentelemetry (brownfield) and a new Vite app (greenfield). Full report: [docs/reports/e2e-v0.4.2.md](docs/reports/e2e-v0.4.2.md).
+### Fixed
+- The stop gate (and the strict test hook) no longer block the first turn after setup; setup output doesn't count as code.
+- Greenfield scaffolding works: generators run in a temporary folder, and the new `adopt_scaffold.py` moves their output into the project.
+- `docs/STATE.md` is seeded from the plan (goal, next step, known gaps) instead of template placeholders.
+- The strict level refuses a plan without a real fast test command.
+- The approval message after a skill review gate names the right command.
+- `/models` keeps the agent list and profile in `CLAUDE.md` in sync.
+- Resume hint punctuation.
+### Added
+- The scan reports `pip` for lockless Python projects, reads every `requirements*.txt`, and adds `test_frameworks` and `ci_commands`.
+- `CLAUDE.md` lists the protected paths. Greenfield guidance adds a test runner when the template has none.
+- 5 regression tests (33 total).
+
 ## [0.4.1] - 2026-10-02
 ### Added
 - `docs/system-design.md`: components, data model, state machines, main flows, trust boundaries, failure handling and design decisions.

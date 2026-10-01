@@ -37,9 +37,12 @@ FRAMEWORKS = {  # dependency name -> framework label
     "hono": "hono", "electron": "electron", "react-native": "react-native", "expo": "expo",
     "fastapi": "fastapi", "django": "django", "flask": "flask", "streamlit": "streamlit",
     "pytest": "pytest", "jest": "jest", "vitest": "vitest", "@playwright/test": "playwright",
-    "cypress": "cypress", "prisma": "prisma", "sqlalchemy": "sqlalchemy", "alembic": "alembic",
+    "cypress": "cypress", "mocha": "mocha", "unittest2": "unittest", "prisma": "prisma", "sqlalchemy": "sqlalchemy", "alembic": "alembic",
     "@sentry/node": "sentry", "@sentry/react": "sentry", "sentry-sdk": "sentry", "jquery": "jquery",
 }
+TEST_FRAMEWORKS = {"pytest", "jest", "vitest", "playwright", "cypress", "mocha"}
+TEST_CONFIGS = {"pytest.ini": "pytest", "conftest.py": "pytest", "jest.config": "jest", "vitest.config": "vitest",
+                "playwright.config": "playwright", "cypress.config": "cypress", ".mocharc": "mocha"}
 FRONTEND = {"nextjs", "react", "vue", "nuxt", "angular", "svelte", "sveltekit", "solid", "astro",
             "jquery", "streamlit", "electron", "react-native", "expo"}
 TEST_DIR_NAMES = {"test", "tests", "__tests__", "spec", "e2e", "cypress"}
@@ -129,13 +132,31 @@ def scan(root, threshold=150):
     langs = Counter(LANG[os.path.splitext(f)[1]] for f in source)
     manifests = [{"path": f, "kind": MANIFESTS[f.rsplit("/", 1)[-1]]} for f in files
                  if f.rsplit("/", 1)[-1] in MANIFESTS]
+    # extra Python dependency files (requirements-dev.txt, requirements/test.txt…) feed framework detection only
+    dep_files = manifests + [{"path": f, "kind": "python"} for f in files
+                             if re.match(r"(.*/)?requirements[\w.-]*\.txt$", f) and f.rsplit("/", 1)[-1] != "requirements.txt"]
     frameworks, scripts = set(), {}
-    for m in manifests:
+    for m in dep_files:
         deps, sc = deps_of(root, m["path"])
         frameworks |= {FRAMEWORKS[d] for d in deps if d in FRAMEWORKS}
         if sc:
             scripts[m["path"]] = sc
-    locks = sorted({LOCKS[f.rsplit("/", 1)[-1]] for f in files if f.rsplit("/", 1)[-1] in LOCKS})
+    locks = {LOCKS[f.rsplit("/", 1)[-1]] for f in files if f.rsplit("/", 1)[-1] in LOCKS}
+    if any(m["kind"] == "python" for m in manifests) and not locks & {"uv", "poetry", "pipenv"}:
+        locks.add("pip")  # requirements.txt / pyproject without a lockfile
+    locks = sorted(locks)
+    test_fw = {fw for fw in frameworks if fw in TEST_FRAMEWORKS}
+    for f in files:
+        base = f.rsplit("/", 1)[-1]
+        for key, fw in TEST_CONFIGS.items():
+            if base == key or base.startswith(key + "."):
+                test_fw.add(fw)
+    ci = []
+    for f in sorted(x for x in files if re.match(r"\.github/workflows/[^/]+\.ya?ml$", x)):
+        for m in re.finditer(r"^[ \t]*(?:-[ \t]*)?run:[ \t]*(?![|>])(\S[^\n]*)$", read(root, f), re.M):
+            cmd = m.group(1).strip().strip("'\"")
+            if cmd and cmd not in ci:
+                ci.append(cmd)
     test_files = [f for f in files if TEST_FILE_RE.search(f.rsplit("/", 1)[-1])
                   or set(f.split("/")[:-1]) & TEST_DIR_NAMES]
     test_dirs = sorted({"/".join(f.split("/")[:i + 1]) for f in test_files
@@ -190,6 +211,8 @@ def scan(root, threshold=150):
         "has_frontend": bool(frameworks & FRONTEND),
         "scripts": scripts,
         "test_files": len(test_files),
+        "test_frameworks": sorted(test_fw),
+        "ci_commands": ci[:15],
         "test_dirs": test_dirs,
         "instruction_files": instructions,
         "env_files": sorted(f for f in files if f.rsplit("/", 1)[-1].startswith(".env")),

@@ -9,6 +9,15 @@ import subprocess
 import sys
 
 
+NOT_CODE = (".gitignore", ".mcp.json", ".env.example")
+
+
+def is_setup_or_docs(path):
+    """Docs, specs, Markdown and Claude setup files don't count as code changes."""
+    return (path.startswith(("docs/", "specs/", ".claude/")) or path.endswith(".md")
+            or path.rsplit("/", 1)[-1] in NOT_CODE)
+
+
 def main():
     data = json.load(sys.stdin)
     if data.get("stop_hook_active"):
@@ -20,7 +29,7 @@ def main():
     except Exception:
         return
     changed = [l[3:].strip().strip('"') for l in porcelain.splitlines() if l.strip()]
-    code = [p for p in changed if p != "docs/STATE.md" and not p.startswith(("docs/", "specs/"))]
+    code = [p for p in changed if not is_setup_or_docs(p)]
     if not code:
         return
     state = os.path.join(project, "docs", "STATE.md")

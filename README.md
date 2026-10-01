@@ -4,11 +4,11 @@
 
 **Set up any project for Claude Code from a plain-language description, with guardrails that are enforced rather than requested.**
 
-[![Version](https://img.shields.io/badge/version-0.4.1-4f46e5?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.4.2-4f46e5?style=flat-square)](CHANGELOG.md)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757?style=flat-square)](https://code.claude.com/docs/en/plugins)
 [![Python](https://img.shields.io/badge/python-3.9%2B-3776AB?style=flat-square&logo=python&logoColor=white)](docs/getting-started.md#prerequisites)
 [![Dependencies](https://img.shields.io/badge/dependencies-none-047857?style=flat-square)](docs/development.md#conventions)
-[![Tests](https://img.shields.io/badge/tests-28%20passing-047857?style=flat-square)](docs/development.md#test-and-validate)
+[![Tests](https://img.shields.io/badge/tests-33%20passing-047857?style=flat-square)](docs/development.md#test-and-validate)
 [![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-64748b?style=flat-square)](docs/troubleshooting.md)
 [![Last commit](https://img.shields.io/github/last-commit/sarveshtalele/claude-project-setup?style=flat-square)](https://github.com/sarveshtalele/claude-project-setup/commits/main)
 
@@ -157,7 +157,7 @@ Full reference: [Commands](docs/commands.md).
 | [Troubleshooting](docs/troubleshooting.md) | Common problems and fixes |
 | [Development](docs/development.md) | Repository layout, tests, release process |
 
-Test reports: [v0.4 phases](docs/reports/v0.4-phases.md) and [tokentelemetry end-to-end](docs/reports/e2e-tokentelemetry.md). Background: [roadmap](docs/roadmap/v0.4-plan.md), [session audit](docs/background/session-audit.md), [playbook](docs/background/playbook.md).
+Test reports: [end-to-end v0.4.2](docs/reports/e2e-v0.4.2.md), [v0.4 phases](docs/reports/v0.4-phases.md) and [tokentelemetry end-to-end](docs/reports/e2e-tokentelemetry.md). Background: [roadmap](docs/roadmap/v0.4-plan.md), [session audit](docs/background/session-audit.md), [playbook](docs/background/playbook.md).
 
 The plugin installs only `plugins/claude-project-setup/`. Documentation stays in this repository.
 
@@ -171,7 +171,7 @@ python3 plugins/claude-project-setup/tests/test_scripts.py
 claude plugin validate . && claude plugin validate plugins/claude-project-setup
 ```
 
-The suite has 28 tests and runs the tracker's own 23 evals. See [Development](docs/development.md) for conventions and the release process.
+The suite has 33 tests and runs the tracker's own 23 evals. See [Development](docs/development.md) for conventions and the release process.
 
 ## Contributing
 

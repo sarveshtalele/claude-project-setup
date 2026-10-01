@@ -74,7 +74,7 @@ def scan_brownfield_modules_and_frameworks():
     d = json.loads(script("scan_repo.py", t).stdout)
     assert d["mode"] == "brownfield" and d["has_frontend"], d
     assert {"react", "fastapi"} <= set(d["frameworks"]), d["frameworks"]
-    assert d["package_managers"] == ["npm"], d["package_managers"]
+    assert d["package_managers"] == ["npm", "pip"], d["package_managers"]  # lockless pyproject = pip
     mods = {m["path"]: m["reasons"] for m in d["module_candidates"]}
     assert "backend" in mods and "own manifest" in mods["backend"], mods
     assert "web" in mods, mods
@@ -564,6 +564,87 @@ def skill_gate_approved_only_by_user_in_set_up_project():
     assert st("approve", "approved").returncode == 6, "self-approval refused when the hook exists"
     assert "Recorded" in hook("approve skill-release-notes")
     assert st("done", "review").returncode == 0 and st("begin", "write").returncode == 0
+
+
+@test
+def e2e_fix_stop_gate_and_state_after_setup():  # e2e v0.4.2 findings 1, 3, 8
+    t = fresh_repo()
+    render(t, plan("standard", next_step="`/task Add CSV export`", known_gaps=["No frontend tests (`web/`)"]))
+    env = dict(os.environ, CLAUDE_PROJECT_DIR=t, PYTHONDONTWRITEBYTECODE="1")
+    stop = lambda: sh([PY, ".claude/hooks/stop_gate.py"], cwd=t, inp="{}", env=env).stdout
+    assert stop() == "", "fresh setup must not trip the stop gate: " + stop()
+    st = open(os.path.join(t, "docs/STATE.md")).read()
+    assert "Demo app for tests." in st and "/task Add CSV export" in st and "No frontend tests" in st, st
+    assert "<the outcome" not in st and "{{" not in st
+    assert "`backend/*`" in open(os.path.join(t, "CLAUDE.md")).read()
+    __import__("time").sleep(1.1)
+    touch(t, "src/app.ts", "x")
+    assert '"block"' in stop()
+
+
+@test
+def e2e_fix_strict_needs_tests_and_skill_approval_message():  # findings 4, 6
+    v = json.load(open(plan()))["vars"]
+    r = render(fresh_repo(), plan("strict", vars={**v, "FAST_TEST_CMD": "n/a"}))
+    assert r.returncode == 2 and "FAST_TEST_CMD" in r.stderr, r.stderr
+    t = fresh_repo()
+    render(t, plan("standard"))
+    assert scaffold(t, SKILL_SPEC).returncode == 0
+    env = dict(os.environ, CLAUDE_PROJECT_DIR=t, PYTHONDONTWRITEBYTECODE="1")
+    st = lambda *a: sh([PY, ".claude/skills/release-notes/scripts/skill_state.py", *a], cwd=t, env=env)
+    st("start")
+    for step in ("collect", "draft"):
+        st("begin", step); st("done", step)
+    msg = sh([PY, ".claude/hooks/approval_capture.py"], cwd=t, inp=json.dumps({"prompt": "approved"}), env=env).stdout
+    assert "skill_state.py done review" in msg and "move skill-" not in msg, msg
+
+
+@test
+def e2e_fix_models_keep_claude_md_in_sync():  # finding 7
+    t = fresh_repo()
+    p = plan("standard")
+    render(t, p)
+    env = dict(os.environ, CLAUDE_PROJECT_DIR=t, PYTHONDONTWRITEBYTECODE="1")
+    pol_path = os.path.join(t, ".claude/agent-models.json")
+    pol = json.load(open(pol_path)); pol["profile"] = "economy"; json.dump(pol, open(pol_path, "w"))
+    sh([PY, ".claude/scripts/apply_models.py"], cwd=t, env=env)
+    cm = open(os.path.join(t, "CLAUDE.md")).read()
+    assert "`reviewer` (sonnet)" in cm and "(profile `economy`)" in cm, cm
+    out = render(t, p).stdout
+    assert "UNCHANGED    CLAUDE.md" in out, [l for l in out.splitlines() if "CLAUDE.md" in l]
+
+
+@test
+def e2e_fix_scan_python_tests_and_ci():  # finding 9
+    t = fresh_repo()
+    touch(t, "requirements.txt", "fastapi\n")
+    touch(t, "requirements-dev.txt", "-r requirements.txt\npytest\n")
+    touch(t, "app/main.py", "x=1")
+    touch(t, "vitest.config.ts", "export default {}")
+    touch(t, ".github/workflows/ci.yml", "jobs:\n  t:\n    steps:\n      - run: |\n          echo multi\n      - run: python -m pytest -q\n        working-directory: app\n      - name: lint\n        run: ruff check .\n")
+    d = json.loads(script("scan_repo.py", t).stdout)
+    assert "pip" in d["package_managers"], d["package_managers"]
+    assert d["test_frameworks"] == ["pytest", "vitest"], d["test_frameworks"]
+    assert d["ci_commands"] == ["python -m pytest -q", "ruff check ."], d["ci_commands"]
+
+
+@test
+def e2e_fix_adopt_scaffold_into_non_empty_project():  # findings 2, 5
+    proj, scaf = fresh_repo(), tempfile.mkdtemp()
+    touch(proj, "PROJECT-BRIEF.md", "# b")
+    touch(proj, ".gitignore", "node_modules/\n")
+    touch(scaf, "app/package.json", "{}"); touch(scaf, "app/src/main.ts", "x")
+    touch(scaf, "app/.gitignore", "node_modules/\ndist/\n"); touch(scaf, "app/node_modules/x/i.js", "x")
+    ad = lambda *a: sh([PY, os.path.join(SCRIPTS, "adopt_scaffold.py"), os.path.join(scaf, "app"), "--target", proj, *a])
+    assert ad("--dry-run").returncode == 0 and not os.path.exists(os.path.join(proj, "package.json"))
+    r = ad()
+    assert r.returncode == 0, r.stderr
+    assert os.path.exists(os.path.join(proj, "src/main.ts")) and not os.path.exists(os.path.join(proj, "node_modules"))
+    assert open(os.path.join(proj, ".gitignore")).read() == "node_modules/\ndist/\n"
+    assert open(os.path.join(proj, "PROJECT-BRIEF.md")).read() == "# b"
+    touch(scaf, "app2/PROJECT-BRIEF.md", "theirs"); touch(scaf, "app2/README.md", "r")
+    r = sh([PY, os.path.join(SCRIPTS, "adopt_scaffold.py"), os.path.join(scaf, "app2"), "--target", proj])
+    assert r.returncode == 3 and not os.path.exists(os.path.join(proj, "README.md")), r.stdout + r.stderr
 
 
 @test
