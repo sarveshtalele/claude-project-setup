@@ -151,6 +151,7 @@ Everything is committed, so **teammates don't need the plugin**.
 | [Development](docs/development.md) | Repo layout, tests, validation, release, conventions |
 | [Troubleshooting](docs/troubleshooting.md) | Common symptoms and fixes |
 | [E2E report: tokentelemetry](docs/reports/e2e-tokentelemetry.md) | A full brownfield run, behaviour checks, bugs fixed |
+| [Roadmap: v0.4 plan](docs/roadmap/v0.4-plan.md) | Project types, agent model optimisation, state tracking |
 | [Background: session audit](docs/background/session-audit.md) | The 20 findings this plugin is designed to prevent |
 | [Background: playbook](docs/background/playbook.md) | The working method behind the plugin |
 
