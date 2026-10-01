@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="270" viewBox="0 0 1200 270" role="img" aria-label="Task lifecycle state machine" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<title>Task lifecycle state machine</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/></marker></defs>
+<rect width="1200" height="270" rx="14" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="24" y="40" font-size="20" font-weight="650" fill="#0f172a" text-anchor="start">Task lifecycle</text>
+<text x="24" y="64" font-size="14" font-weight="400" fill="#64748b" text-anchor="start">Every /task is a state machine. Work can't start without your approval, and can't finish without a passing verification.</text>
+<rect x="24" y="120" width="170" height="56" rx="28" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="109.0" y="154" font-size="14" font-weight="700" fill="#0f172a" text-anchor="middle">PLANNED</text>
+<line x1="198" y1="148" x2="262" y2="148" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<text x="230.0" y="138" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle">approve</text>
+<text x="230.0" y="196" font-size="11" font-weight="600" fill="#b45309" text-anchor="middle">needs your reply</text>
+<rect x="266" y="120" width="170" height="56" rx="28" fill="#eef2ff" stroke="#4f46e5"/>
+<text x="351.0" y="154" font-size="14" font-weight="700" fill="#4f46e5" text-anchor="middle">APPROVED</text>
+<line x1="440" y1="148" x2="504" y2="148" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<text x="472.0" y="138" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle">start</text>
+<rect x="508" y="120" width="170" height="56" rx="28" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="593.0" y="154" font-size="14" font-weight="700" fill="#0f172a" text-anchor="middle">IN_PROGRESS</text>
+<line x1="682" y1="148" x2="746" y2="148" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<text x="714.0" y="138" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle">submit</text>
+<rect x="750" y="120" width="170" height="56" rx="28" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="835.0" y="154" font-size="14" font-weight="700" fill="#0f172a" text-anchor="middle">VERIFYING</text>
+<line x1="924" y1="148" x2="988" y2="148" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<text x="956.0" y="138" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle">pass</text>
+<text x="956.0" y="196" font-size="11" font-weight="600" fill="#b45309" text-anchor="middle">needs verify_passed</text>
+<rect x="992" y="120" width="170" height="56" rx="28" fill="#ecfdf5" stroke="#047857"/>
+<text x="1077.0" y="154" font-size="14" font-weight="700" fill="#047857" text-anchor="middle">DONE</text>
+<path d="M835.0,176 C835.0,240 593.0,240 593.0,180" fill="none" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<text x="714.0" y="238" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle">fail</text>
+</svg>

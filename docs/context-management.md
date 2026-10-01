@@ -2,19 +2,6 @@
 
 **Files are memory; the chat isn't.** Each session starts from the project's files, not from conversation history.
 
-```mermaid
-flowchart LR
-    subgraph Session
-      direction LR
-      SS["SessionStart hook"] --> W["Work on one task"] --> SG{"Stop gate:<br/>STATE.md current?"}
-      SG -- no --> UP["Update STATE.md"] --> SG
-    end
-    ST[("docs/STATE.md")] --> SS
-    UP --> ST
-    SG -- yes --> CP["/checkpoint → /clear"]
-    CP --> SS
-```
-
 ## Where things live
 | Need | File | Loaded |
 |---|---|---|

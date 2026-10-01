@@ -1,26 +1,6 @@
 # Architecture
 
-```mermaid
-flowchart TB
-    subgraph Plugin["plugins/claude-project-setup (installed)"]
-      SK["skills/<br/>brief · bootstrap · doctor · integrations"]
-      SC["scripts/<br/>scan_repo · scan_tools · render · scaffold · doctor · hint"]
-      TP["templates/<br/>CLAUDE · agents · hooks · rules · settings"]
-      CA["catalog/integrations.json"]
-      HK["hooks/hooks.json<br/>SessionStart hint · approval capture"]
-      TR["tracker/<br/>state machine engine + evals"]
-    end
-    subgraph Project["Your project (generated, committed)"]
-      CM["CLAUDE.md + module CLAUDE.md"]
-      CL[".claude/ agents · hooks · rules · skills · settings"]
-      DO["docs/STATE.md · ARCHITECTURE.md · adr/"]
-      MF[".claude/setup-manifest.json<br/>plan + hashes"]
-    end
-    SK --> SC
-    SC --> TP
-    SC --> CA
-    SC -- "render.py" --> Project
-```
+<p align="center"><img src="assets/architecture.svg" alt="Architecture" width="100%"></p>
 
 ## Design principles
 - **Deterministic core.** Scanning, classifying, rendering and health checks are Python standard-library scripts. The model only interviews you and fills in the plan.
@@ -51,12 +31,3 @@ Exit code `2` means the plan is invalid (missing variable, unknown template, lit
 
 ## Upgrade path
 
-```mermaid
-flowchart LR
-    U["plugin update"] --> D["doctor upgrade<br/>render.py --dry-run"]
-    D --> X{"per file"}
-    X -- "unedited" --> UP["UPGRADE"]
-    X -- "edited" --> KE["KEEP-EDITED + diff"]
-    X -- "seed" --> KS["KEEP-SEED"]
-    X -- "merged" --> MG["MERGE missing entries"]
-```

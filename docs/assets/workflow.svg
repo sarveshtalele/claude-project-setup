@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="250" viewBox="0 0 1200 250" role="img" aria-label="Claude Project Setup workflow" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<title>Claude Project Setup workflow</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/></marker></defs>
+<rect width="1200" height="250" rx="14" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="24" y="40" font-size="20" font-weight="650" fill="#0f172a" text-anchor="start">From a description to a verified Claude Code setup</text>
+<text x="24" y="64" font-size="14" font-weight="400" fill="#64748b" text-anchor="start">Scripts do the repetitive work. Nothing is written until you approve the plan.</text>
+<rect x="24" y="92" width="128" height="96" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+<circle cx="46" cy="116" r="12" fill="#0f172a"/>
+<text x="46" y="121" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<text x="38" y="154" font-size="16" font-weight="650" fill="#0f172a" text-anchor="start">Describe</text>
+<text x="38" y="174" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">in chat</text>
+<line x1="154" y1="140" x2="168" y2="140" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="170" y="92" width="128" height="96" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+<circle cx="192" cy="116" r="12" fill="#0f172a"/>
+<text x="192" y="121" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+<text x="184" y="154" font-size="16" font-weight="650" fill="#0f172a" text-anchor="start">Brief</text>
+<text x="184" y="174" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">PROJECT-BRIEF.md</text>
+<line x1="300" y1="140" x2="314" y2="140" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="316" y="92" width="128" height="96" rx="12" fill="#ecfdf5" stroke="#047857"/>
+<circle cx="338" cy="116" r="12" fill="#047857"/>
+<text x="338" y="121" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+<text x="330" y="154" font-size="16" font-weight="650" fill="#0f172a" text-anchor="start">Scan</text>
+<text x="330" y="174" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">repo and tools</text>
+<line x1="446" y1="140" x2="460" y2="140" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="462" y="92" width="128" height="96" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+<circle cx="484" cy="116" r="12" fill="#0f172a"/>
+<text x="484" y="121" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+<text x="476" y="154" font-size="16" font-weight="650" fill="#0f172a" text-anchor="start">Interview</text>
+<text x="476" y="174" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">up to 8 questions</text>
+<line x1="592" y1="140" x2="606" y2="140" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="608" y="92" width="128" height="96" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+<circle cx="630" cy="116" r="12" fill="#0f172a"/>
+<text x="630" y="121" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">5</text>
+<text x="622" y="154" font-size="16" font-weight="650" fill="#0f172a" text-anchor="start">Plan</text>
+<text x="622" y="174" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">dry run</text>
+<line x1="738" y1="140" x2="752" y2="140" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="754" y="92" width="128" height="96" rx="12" fill="#eef2ff" stroke="#4f46e5"/>
+<circle cx="776" cy="116" r="12" fill="#4f46e5"/>
+<text x="776" y="121" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">6</text>
+<text x="768" y="154" font-size="16" font-weight="650" fill="#0f172a" text-anchor="start">Approve</text>
+<text x="768" y="174" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">your reply</text>
+<line x1="884" y1="140" x2="898" y2="140" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="900" y="92" width="128" height="96" rx="12" fill="#ecfdf5" stroke="#047857"/>
+<circle cx="922" cy="116" r="12" fill="#047857"/>
+<text x="922" y="121" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">7</text>
+<text x="914" y="154" font-size="16" font-weight="650" fill="#0f172a" text-anchor="start">Generate</text>
+<text x="914" y="174" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">render.py</text>
+<line x1="1030" y1="140" x2="1044" y2="140" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="1046" y="92" width="128" height="96" rx="12" fill="#ecfdf5" stroke="#047857"/>
+<circle cx="1068" cy="116" r="12" fill="#047857"/>
+<text x="1068" y="121" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">8</text>
+<text x="1060" y="154" font-size="16" font-weight="650" fill="#0f172a" text-anchor="start">Verify</text>
+<text x="1060" y="174" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">self-test, doctor</text>
+<rect x="24" y="206" width="16" height="16" rx="4" fill="#ecfdf5" stroke="#047857"/>
+<text x="48" y="219" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">Deterministic script</text>
+<rect x="254" y="206" width="16" height="16" rx="4" fill="#eef2ff" stroke="#4f46e5"/>
+<text x="278" y="219" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">Your decision</text>
+<rect x="484" y="206" width="16" height="16" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="508" y="219" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">Claude, guided by skills</text>
+</svg>

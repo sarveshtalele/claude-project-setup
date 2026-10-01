@@ -2,7 +2,10 @@
 
 All notable changes to this project. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versions follow [SemVer](https://semver.org/).
 
-## [Unreleased]
+## [0.4.0] - 2026-10-02
+### Changed
+- README redesigned to a conventional open-source layout, with five light-theme SVG diagrams (workflow, architecture, guardrail levels, task lifecycle, generated files) and no emojis.
+- Documentation: Mermaid diagrams replaced with the SVGs or with tables; emojis removed. `docs/agents.md` is renamed `docs/subagents.md`, because on case-insensitive file systems Claude Code loaded it as an `AGENTS.md` instruction file.
 ### Added
 - State machines (roadmap phases 1–2). The bootstrap machine makes setup resumable, and `render.py` refuses a first-time setup until it's `APPROVED`. Each `/task` gets a task machine (`PLANNED → APPROVED → IN_PROGRESS → VERIFYING → DONE`) at the standard and strict levels.
 - `approval_capture` hook: `user_approved` is recorded only from the user's own message. `state_cli` refuses it, and `guard.py` blocks it in the shell.

@@ -1,32 +1,6 @@
 # Workflow: from description to a set-up project
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor U as You
-    participant C as Claude Code
-    participant S as Scripts (no AI)
-    participant P as Project
-    U->>C: Describe the project / "set up this repo"
-    C->>S: scan_repo.py
-    S-->>C: mode, stack, modules, existing instructions
-    C->>U: Draft brief. Create PROJECT-BRIEF.md?
-    U->>C: Yes (edit, then "go")
-    C->>S: scan_tools.py
-    S-->>C: plugins and MCP servers: REUSE / ADD / SKIP / CONFLICT
-    C->>U: Interview (≤ 2 rounds × 4 questions)
-    U->>C: Answers (or defaults)
-    C->>S: render.py --dry-run
-    S-->>C: exact file list
-    C->>U: Setup plan. Reply "approved"
-    U->>C: approved
-    Note over U,C: approval hook records user_approved from your message
-    C->>S: state_cli move bootstrap approve
-    C->>S: render.py (refuses unless APPROVED)
-    S->>P: CLAUDE.md files, agents, hooks, settings, .mcp.json
-    C->>S: selftest.py + doctor.py
-    S-->>U: PASS table
-```
+<p align="center"><img src="assets/workflow.svg" alt="Workflow" width="100%"></p>
 
 ## Step by step
 
@@ -73,16 +47,6 @@ sequenceDiagram
 - Claude offers a commit, then tells you to start a new session.
 
 ## Greenfield vs brownfield
-
-```mermaid
-flowchart TD
-    Q{"Source files?"} -- none --> G["Greenfield"]
-    Q -- some --> B["Brownfield"]
-    G --> G1["Architecture + ADR-0001"] --> G2["Official scaffold"] --> G3["Verify commands"] --> G4["Task stubs per requirement"]
-    B --> B1["Facts from scan"] --> B2["Merge existing instructions"] --> B3["Module CLAUDE.md"] --> B4["No source changes"]
-    G4 --> R["render.py"]
-    B4 --> R
-```
 
 | | Greenfield | Brownfield |
 |---|---|---|

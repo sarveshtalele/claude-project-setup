@@ -2,20 +2,7 @@
 
 ## The daily loop
 
-```mermaid
-flowchart LR
-    S(["New session"]) --> I["STATE.md auto-loaded"]
-    I --> T["/task &lt;title&gt;"]
-    T --> A{"Approve spec?"}
-    A -- edit --> T
-    A -- yes --> IM["implementer"]
-    IM --> V["verifier<br/>real output"]
-    V --> R["reviewer<br/>diff vs spec"]
-    R --> C["commit"]
-    C --> CP["/checkpoint"]
-    CP --> CL(["/clear"])
-    CL --> I
-```
+<p align="center"><img src="assets/task-lifecycle.svg" alt="Task lifecycle" width="100%"></p>
 
 - **One task per session.** When a task is done, run `/checkpoint`, then `/clear`.
 - **Plan first.** Any change touching more than one file goes through `/task`.

@@ -2,16 +2,7 @@
 
 Rules are enforced in layers. Each rule goes in the strongest layer that can express it.
 
-```mermaid
-flowchart TB
-    P["Permissions<br/>settings.json allow / ask / deny"] --> H["Hooks<br/>deterministic Python"]
-    H --> SB["Sandbox<br/>OS-level, if enabled"]
-    SB --> T["CLAUDE.md, rules, skills<br/>intent and conventions"]
-    style P fill:#16a34a,color:#fff
-    style H fill:#2563eb,color:#fff
-    style SB fill:#7c3aed,color:#fff
-    style T fill:#64748b,color:#fff
-```
+<p align="center"><img src="assets/guardrail-levels.svg" alt="Guardrail levels" width="100%"></p>
 
 ## Levels
 
@@ -36,19 +27,6 @@ flowchart TB
 | `format_on_edit.py` | PostToolUse: Write, Edit, MultiEdit | Runs your formatter on the edited file only; never blocks |
 
 ## What guard.py decides
-
-```mermaid
-flowchart LR
-    W["Write / Edit"] --> O{"Outside project?"}
-    O -- "yes (not temp dir)" --> D1["deny"]
-    O -- no --> PR{"Protected?"}
-    PR -- yes --> D2["deny"]
-    PR -- no --> N{"New file?"}
-    N -- no --> OK1["allow"]
-    N -- yes --> WA{"In write-allow.txt?"}
-    WA -- yes --> OK2["allow"]
-    WA -- no --> ASK["ask you"]
-```
 
 | Always denied | Always asks |
 |---|---|

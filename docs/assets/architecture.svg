@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="480" viewBox="0 0 1200 480" role="img" aria-label="Architecture: plugin and generated project" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<title>Architecture: plugin and generated project</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/></marker></defs>
+<rect width="1200" height="480" rx="14" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="24" y="40" font-size="20" font-weight="650" fill="#0f172a" text-anchor="start">What gets installed, and what lands in your project</text>
+<text x="24" y="64" font-size="14" font-weight="400" fill="#64748b" text-anchor="start">The plugin generates files from a plan. Your project keeps everything it needs, so teammates need only the repo.</text>
+<rect x="24" y="88" width="500" height="364" rx="14" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="44" y="120" font-size="16" font-weight="700" fill="#4f46e5" text-anchor="start">Plugin</text>
+<text x="44" y="140" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">installed once with claude plugin install</text>
+<rect x="40" y="160" width="468" height="38" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="54" y="184" font-size="13" font-weight="650" fill="#0f172a" text-anchor="start">skills/</text>
+<text x="224" y="184" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">brief, bootstrap, doctor, integrations, create-*</text>
+<rect x="40" y="206" width="468" height="38" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="54" y="230" font-size="13" font-weight="650" fill="#0f172a" text-anchor="start">scripts/</text>
+<text x="224" y="230" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">scan_repo, scan_tools, render, scaffold, doctor</text>
+<rect x="40" y="252" width="468" height="38" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="54" y="276" font-size="13" font-weight="650" fill="#0f172a" text-anchor="start">templates/</text>
+<text x="224" y="276" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">CLAUDE.md, agents, hooks, rules, settings</text>
+<rect x="40" y="298" width="468" height="38" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="54" y="322" font-size="13" font-weight="650" fill="#0f172a" text-anchor="start">tracker/</text>
+<text x="224" y="322" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">state machine engine with its own evals</text>
+<rect x="40" y="344" width="468" height="38" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="54" y="368" font-size="13" font-weight="650" fill="#0f172a" text-anchor="start">catalog/</text>
+<text x="224" y="368" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">MCP servers and capabilities</text>
+<rect x="40" y="390" width="468" height="38" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="54" y="414" font-size="13" font-weight="650" fill="#0f172a" text-anchor="start">hooks/</text>
+<text x="224" y="414" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">session hint, approval capture</text>
+<rect x="676" y="88" width="500" height="364" rx="14" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="696" y="120" font-size="16" font-weight="700" fill="#047857" text-anchor="start">Your project</text>
+<text x="696" y="140" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">generated, reviewed, committed</text>
+<rect x="692" y="160" width="468" height="38" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="706" y="184" font-size="13" font-weight="650" fill="#0f172a" text-anchor="start">CLAUDE.md</text>
+<text x="876" y="184" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">root rules, plus one per large module</text>
+<rect x="692" y="206" width="468" height="38" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="706" y="230" font-size="13" font-weight="650" fill="#0f172a" text-anchor="start">.claude/agents/</text>
+<text x="876" y="230" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">subagents tuned by agent-models.json</text>
+<rect x="692" y="252" width="468" height="38" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="706" y="276" font-size="13" font-weight="650" fill="#0f172a" text-anchor="start">.claude/hooks/</text>
+<text x="876" y="276" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">guardrails registered in settings.json</text>
+<rect x="692" y="298" width="468" height="38" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="706" y="322" font-size="13" font-weight="650" fill="#0f172a" text-anchor="start">.claude/state-machine/</text>
+<text x="876" y="322" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">setup and task state, event logs</text>
+<rect x="692" y="344" width="468" height="38" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="706" y="368" font-size="13" font-weight="650" fill="#0f172a" text-anchor="start">docs/STATE.md</text>
+<text x="876" y="368" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">memory that survives /clear</text>
+<rect x="692" y="390" width="468" height="38" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="706" y="414" font-size="13" font-weight="650" fill="#0f172a" text-anchor="start">specs/tasks/</text>
+<text x="876" y="414" font-size="13" font-weight="400" fill="#64748b" text-anchor="start">one approved spec per change</text>
+<rect x="540" y="236" width="120" height="70" rx="10" fill="#eef2ff" stroke="#4f46e5"/>
+<text x="600" y="266" font-size="14" font-weight="700" fill="#4f46e5" text-anchor="middle">render.py</text>
+<text x="600" y="286" font-size="11" font-weight="400" fill="#64748b" text-anchor="middle">plan in, files out</text>
+<line x1="526" y1="271" x2="538" y2="271" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<line x1="662" y1="271" x2="674" y2="271" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+</svg>

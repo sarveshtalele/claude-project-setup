@@ -34,17 +34,7 @@ claude --plugin-dir ./claude-project-setup/plugins/claude-project-setup
 
 ## First run
 
-```mermaid
-flowchart LR
-    A["Describe your project<br/>in chat"] --> B["Brief drafted<br/>PROJECT-BRIEF.md"]
-    B --> C["You review<br/>edit or say go"]
-    C --> D["Interview<br/>≤ 2 rounds"]
-    D --> E["Setup plan<br/>dry run"]
-    E --> F{"Approve?"}
-    F -- yes --> G["Generate + verify"]
-    F -- change --> E
-    G --> H["New session<br/>/task …"]
-```
+<p align="center"><img src="assets/workflow.svg" alt="Workflow" width="100%"></p>
 
 - **New project:** in an empty folder, describe what you want to build:
   > I want to build a habit-tracker web app with login, daily streaks and a weekly email summary.

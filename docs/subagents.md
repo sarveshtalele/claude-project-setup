@@ -2,17 +2,6 @@
 
 Generated into `.claude/agents/`, with your real commands, paths and risk areas filled in.
 
-```mermaid
-flowchart LR
-    M(["Main session"]) -- "search > 3 files" --> E["explorer<br/>haiku · read-only"]
-    M -- "approved task" --> I["implementer<br/>sonnet"]
-    I --> V["verifier<br/>haiku · runs checks"]
-    V --> R["reviewer<br/>inherit · diff vs spec"]
-    R -. "risk areas" .-> SR["security-reviewer"]
-    R -. "UI change" .-> UV["ui-verifier"]
-    E -. "facts path:line" .-> M
-```
-
 | Agent | Included | Model | Writes? | Role |
 |---|---|---|---|---|
 | `explorer` | always | haiku | no | Finds code; returns at most 30 lines of `path:line` facts |
@@ -28,21 +17,6 @@ flowchart LR
 The models above are the **balanced** profile. Every model setting comes from one file you can edit.
 
 ## Model optimisation
-
-```mermaid
-flowchart LR
-    P["📝 .claude/agent-models.json<br/>you edit: profile + per-agent overrides"] --> A["apply_models.py<br/>deterministic"]
-    A --> F["🤖 .claude/agents/*.md<br/>model · effort · maxTurns · tools · omitClaudeMd"]
-    F -. "you can also edit directly" .-> F
-    F --> RUN{"Agent runs"}
-    RUN -- "result" --> OK(["✅ done"])
-    RUN -- "UNCERTAIN / 2 failures" --> ESC["Escalate one tier<br/>haiku → sonnet → inherit"]
-    ESC --> RUN
-    D["doctor"] -. "checks drift + cost" .-> F
-    style P fill:#d97757,color:#fff,stroke:none
-    style F fill:#7c3aed,color:#fff,stroke:none
-    style OK fill:#16a34a,color:#fff,stroke:none
-```
 
 | Technique | Setting | Saves |
 |---|---|---|

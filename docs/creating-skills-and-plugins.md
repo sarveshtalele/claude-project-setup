@@ -11,19 +11,6 @@ Setup recognises five **project types**, and has a generator for each kind of AI
 | `plugin` | `.claude-plugin/plugin.json` or `marketplace.json` | `create-plugin` |
 | `unknown` | Empty folder | One interview question decides |
 
-```mermaid
-flowchart LR
-    D(["💬 'a skill that…' / 'a plugin for…'"]) --> Q["≤ 4 questions<br/>steps · gates · tier"]
-    Q --> S["spec.json<br/>(temp dir)"]
-    S --> DR["scaffold.py --dry-run<br/>files + step diagram"]
-    DR --> OK{"You approve"}
-    OK --> W["scaffold.py<br/>never overwrites"]
-    W --> E["evals/run_evals.py<br/>+ claude plugin validate"]
-    E --> R(["✅ ready to use"])
-    style D fill:#d97757,color:#fff,stroke:none
-    style R fill:#16a34a,color:#fff,stroke:none
-```
-
 ## A skill (`/claude-project-setup:create-skill`)
 You describe the outcome, the steps and which steps need your review. You get:
 
@@ -39,24 +26,20 @@ You describe the outcome, the steps and which steps need your review. You get:
 
 **Tracking** is on automatically for 3 or more steps or any review gate. Each step becomes a state:
 
-```mermaid
-stateDiagram-v2
-    direction LR
-    [*] --> COLLECT
-    COLLECT --> DRAFT: done_collect
-    DRAFT --> REVIEW: done_draft
-    REVIEW --> WRITE: done_review [user_approved]
-    REVIEW --> DRAFT: rework
-    WRITE --> DONE: done_write
-    DONE --> [*]
-```
+| From | Event | To | Guard |
+|---|---|---|---|
+| COLLECT | `done_collect` | DRAFT | |
+| DRAFT | `done_draft` | REVIEW | |
+| REVIEW | `done_review` | WRITE | `user_approved` (since entering REVIEW) |
+| REVIEW | `rework` | DRAFT | |
+| WRITE | `done_write` | DONE | |
 - `begin <step>` refuses a step that isn't next (exit 5).
 - `done <gate>` refuses until **you** approve (exit 4). In a project set up by this plugin, your reply (`approved`, or `approve skill-<name>`) is recorded by the approval hook. In other projects, `skill_state.py approve "<your words>"` records it.
 - `rework` returns to the previous step, and the next pass needs a fresh approval.
 - Runs live in `.claude/state-machine/.state-machine/skill-<name>/`; `report` writes the progress and changelog for each one.
 
 ## An agent (`/claude-project-setup:create-agent`)
-Tier → model per profile → fewest tools → fixed output → `UNCERTAIN` rule → added to all three profiles. See [Agents](agents.md#create-your-own-agent).
+Tier → model per profile → fewest tools → fixed output → `UNCERTAIN` rule → added to all three profiles. See [Subagents](subagents.md#create-your-own-agent).
 
 ## A plugin or skill bundle (`/claude-project-setup:create-plugin`)
 ```
@@ -80,4 +63,4 @@ Done means both `claude plugin validate .` and `claude plugin validate plugins/<
 | An agent tier is scout, builder or judge | Exit 2 |
 | Any target file already exists | Exit 3, nothing written |
 
-Tested end to end on a real repo (a generated `release-notes` skill: refused out of order, gate held until "approve skill-release-notes", report rendered). See the [report](reports/phase1-2-state-machines.md#phase-4-project-types-and-generators).
+Tested end to end on a real repo (a generated `release-notes` skill: refused out of order, gate held until "approve skill-release-notes", report rendered). See the [report](reports/v0.4-phases.md#phase-4-project-types-and-generators).

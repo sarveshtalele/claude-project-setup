@@ -1,15 +1,5 @@
 # Integrations: plugins and MCP servers
 
-```mermaid
-flowchart LR
-    INV["Inventory<br/>claude plugin list / details<br/>claude mcp list · .mcp.json"] --> NEED["Needs<br/>brief + auto-detected"]
-    NEED --> C{"Classify"}
-    C --> RU["REUSE<br/>installed, fits"]
-    C --> AD["ADD<br/>fills a gap"]
-    C --> SK["SKIP<br/>not needed"]
-    C --> CF["CONFLICT<br/>pick one"]
-```
-
 | Class | Meaning | After approval |
 |---|---|---|
 | **REUSE** | Installed and fits a need | `enabledPlugins: true`, or the server is already configured |

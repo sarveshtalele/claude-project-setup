@@ -2,55 +2,26 @@
 
 Every important step is a **state transition in an append-only event log**. That gives you three things: the setup resumes after an interruption, steps can't run out of order, and approvals come only from your own words.
 
-```mermaid
-flowchart LR
-    U(["You: 'approved'"]) --> H["approval_capture hook<br/>UserPromptSubmit"]
-    H -- "records user_approved" --> L[("events.jsonl<br/>source of truth")]
-    C["Claude: state_cli.py move"] -- "validated transition" --> L
-    C -. "record user_approved" .-> X["refused (exit 6)<br/>+ guard.py deny"]
-    L --> R["replay → current state"]
-    R --> G1["render.py gate"]
-    R --> G2["scope_check hook"]
-    R --> G3["/checkpoint · reports"]
-    style U fill:#d97757,color:#fff,stroke:none
-    style X fill:#dc2626,color:#fff,stroke:none
-    style L fill:#7c3aed,color:#fff,stroke:none
-```
-
 ## The machines
 
 **Bootstrap** (one per project). It starts when you agree to create the brief.
-```mermaid
-stateDiagram-v2
-    direction LR
-    [*] --> SCANNED
-    SCANNED --> BRIEFED: brief_written
-    BRIEFED --> INTERVIEWED: answers_recorded
-    INTERVIEWED --> PLANNED: plan_previewed
-    PLANNED --> PLANNED: plan_changed
-    PLANNED --> APPROVED: approve [user_approved]
-    APPROVED --> PLANNED: plan_changed
-    APPROVED --> GENERATED: rendered
-    GENERATED --> APPROVED: checks_failed
-    GENERATED --> VERIFIED: checks_passed
-    VERIFIED --> [*]
-```
+| From | Event | To | Guard |
+|---|---|---|---|
+| SCANNED | `brief_written` | BRIEFED | |
+| BRIEFED | `answers_recorded` | INTERVIEWED | |
+| INTERVIEWED | `plan_previewed` | PLANNED | |
+| PLANNED | `plan_changed` | PLANNED | |
+| PLANNED | `approve` | APPROVED | `user_approved` (since entering PLANNED) |
+| APPROVED | `plan_changed` | PLANNED | |
+| APPROVED | `rendered` | GENERATED | |
+| GENERATED | `checks_failed` | APPROVED | |
+| GENERATED | `checks_passed` | VERIFIED | |
 - `render.py` **refuses** to write a first-time setup unless the machine is in `APPROVED`. It moves the machine to `GENERATED` itself.
 - Approval only counts for the plan it was given to (`since_entry`). Changing the plan afterwards needs a new "approved".
 - If a session ends partway, the next session's start hook tells Claude where to resume.
 
 **Task** (one per `/task`, at the standard and strict levels).
-```mermaid
-stateDiagram-v2
-    direction LR
-    [*] --> PLANNED
-    PLANNED --> APPROVED: approve [user_approved]
-    APPROVED --> IN_PROGRESS: start
-    IN_PROGRESS --> VERIFYING: submit
-    VERIFYING --> IN_PROGRESS: fail
-    VERIFYING --> DONE: pass [verify_passed since_entry]
-    DONE --> [*]
-```
+<p align="center"><img src="assets/task-lifecycle.svg" alt="Task lifecycle" width="100%"></p>
 
 | Who | Does |
 |---|---|
@@ -85,4 +56,4 @@ python3 .claude/state-machine/state_cli.py report TASK-007-x # progress.md + cha
 | `.claude/state-machine/.state-machine/<id>/events.jsonl` | **The truth.** Commit it; it's your audit trail |
 | `…/<id>/state-snapshot.json` | A cache, rebuilt by `tracker/scripts/resume.py` |
 
-The tracker is derived from the `state-machine-tracker` skill, with 4 bug fixes found in testing; see [Phase 1–2 report](reports/phase1-2-state-machines.md).
+The tracker is derived from the `state-machine-tracker` skill, with 4 bug fixes found in testing; see [Phase 1–2 report](reports/v0.4-phases.md).
