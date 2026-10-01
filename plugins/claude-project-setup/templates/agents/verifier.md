@@ -27,3 +27,5 @@ Never write "should pass", "likely works" or similar. Report only what ran.
 If `.claude/state-machine/state_cli.py` exists, record the verdict on the task machine (`python3 .claude/state-machine/state_cli.py …`):
 - **PASS** (no out-of-scope files): `record <task-id> verify_passed`, then `move <task-id> pass`.
 - **FAIL:** `move <task-id> fail`.
+
+If you can't do this reliably (missing facts, ambiguous spec, repeated failure), add a final line `UNCERTAIN: <why>`. The main session may re-run you once on a stronger model.

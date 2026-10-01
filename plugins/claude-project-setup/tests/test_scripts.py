@@ -389,6 +389,83 @@ def light_level_has_no_state_machines():
     assert "UserPromptSubmit" not in s["hooks"], s["hooks"].keys()
 
 
+def frontmatter_of(path):
+    head = open(path).read().split("\n---", 1)[0].splitlines()[1:]
+    return dict(l.split(": ", 1) for l in head if ": " in l)
+
+
+@test
+def render_applies_model_policy():
+    t = fresh_repo()
+    render(t, plan("standard"))
+    ex = frontmatter_of(os.path.join(t, ".claude/agents/explorer.md"))
+    assert ex["model"] == "haiku" and "effort" not in ex and ex["maxTurns"] == "25" and ex["omitClaudeMd"] == "true", ex
+    rv = frontmatter_of(os.path.join(t, ".claude/agents/reviewer.md"))
+    assert rv["model"] == "inherit" and rv["effort"] == "high", rv
+    me = frontmatter_of(os.path.join(t, ".claude/agents/api-expert.md"))
+    assert me["model"] == "sonnet" and me["effort"] == "medium", me              # *-expert glob
+    cm = open(os.path.join(t, "CLAUDE.md")).read()
+    assert "haiku → sonnet → opus" in cm and "agent-models.json" in cm and "`explorer` (haiku)" in cm
+    assert json.load(open(os.path.join(t, ".claude/agent-models.json")))["profile"] == "balanced"
+    u = fresh_repo()
+    render(u, plan("standard", models={"profile": "economy", "overrides": {"implementer": {"model": "opus"}}}))
+    assert frontmatter_of(os.path.join(u, ".claude/agents/reviewer.md"))["model"] == "sonnet"
+    assert frontmatter_of(os.path.join(u, ".claude/agents/implementer.md"))["model"] == "opus"
+
+
+@test
+def models_apply_keeps_prompts_and_upgrades_cooperate():
+    t = fresh_repo()
+    p = plan("standard")
+    render(t, p)
+    env = dict(os.environ, CLAUDE_PROJECT_DIR=t, PYTHONDONTWRITEBYTECODE="1")
+    apply = lambda *a: sh([PY, ".claude/scripts/apply_models.py", *a], cwd=t, env=env)
+    impl = os.path.join(t, ".claude/agents/implementer.md")
+    with open(impl, "a") as f:
+        f.write("\nHouse rule: prefer small commits.\n")                       # user's own prompt edit
+    pol_path = os.path.join(t, ".claude/agent-models.json")
+    pol = json.load(open(pol_path))
+    pol["profile"] = "quality"
+    pol["overrides"] = {"implementer": {"model": "opus", "effort": "max"}}
+    json.dump(pol, open(pol_path, "w"), indent=2)
+    r = apply()
+    assert r.returncode == 0 and "implementer" in json.loads(r.stdout)["updated"], r.stdout + r.stderr
+    fm = frontmatter_of(impl)
+    assert fm["model"] == "opus" and fm["effort"] == "max", fm
+    assert "House rule: prefer small commits." in open(impl).read()
+    assert frontmatter_of(os.path.join(t, ".claude/agents/explorer.md"))["model"] == "sonnet"   # quality profile
+    assert json.loads(apply("--check").stdout)["differs_from_policy"] == []
+    out = render(t, p).stdout                                                     # plugin upgrade after /models
+    agent_lines = [l for l in out.splitlines() if ".claude/agents/" in l]
+    assert all(l.startswith("UNCHANGED") or l.startswith("KEEP-EDITED  .claude/agents/implementer.md")
+               for l in agent_lines), agent_lines
+    assert "KEEP-SEED    .claude/agent-models.json" in out, out
+    assert json.load(open(pol_path))["profile"] == "quality", "render must never overwrite the user's policy"
+
+
+@test
+def model_drift_warns_and_bad_policy_fails():
+    t = fresh_repo()
+    render(t, plan("standard"))
+    env = dict(os.environ, CLAUDE_PROJECT_DIR=t, PYTHONDONTWRITEBYTECODE="1")
+    ex = os.path.join(t, ".claude/agents/explorer.md")
+    edited = open(ex).read().replace("model: haiku", "model: opus")              # hand edit
+    open(ex, "w").write(edited)
+    d = script("doctor.py", t).stdout
+    assert "WARN | agent models" in d and "explorer" in d and "0 FAIL" in d, d
+    pol_path = os.path.join(t, ".claude/agent-models.json")
+    pol = json.load(open(pol_path))
+    pol["overrides"] = {"explorer": {"model": "gpt-4", "effort": "ultra"}}
+    json.dump(pol, open(pol_path, "w"))
+    before = open(ex).read()
+    r = sh([PY, ".claude/scripts/apply_models.py"], cwd=t, env=env)
+    assert r.returncode == 2 and "gpt-4" in r.stderr and open(ex).read() == before, r.stderr
+    assert "FAIL | agent model policy" in script("doctor.py", t).stdout
+    u = fresh_repo()
+    r = render(u, plan("standard", models={"profile": "turbo"}))
+    assert r.returncode == 2 and "turbo" in r.stderr, r.stderr
+
+
 @test
 def upgrade_from_manifest_without_plan():
     t = fresh_repo()

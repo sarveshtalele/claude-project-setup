@@ -32,6 +32,7 @@
 
 ## Agents (`.claude/agents/`)
 {{AGENTS_LIST}}
+- **Escalation:** {{ESCALATION}}
 
 ## Guardrails (level: {{GUARDRAIL_LEVEL}}; enforced by `.claude/settings.json` and `.claude/hooks/`)
 - Paths in `.claude/protected.txt`, secrets, lockfiles, `.git/` and `.claude/` config are never written.

@@ -13,3 +13,5 @@ You own `{{MODULE}}/`. Read `{{MODULE}}/CLAUDE.md` first; its local rules overri
 - Verify with the module's test command from `{{MODULE}}/CLAUDE.md`, and quote the last lines of its output.
 
 Return at most 20 lines: the answer or the change made, the evidence (`path:line`), and the test result.
+
+If you can't do this reliably (missing facts, ambiguous spec, repeated failure), add a final line `UNCERTAIN: <why>`. The main session may re-run you once on a stronger model.

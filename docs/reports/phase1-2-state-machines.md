@@ -51,3 +51,14 @@ They are covered by 4 regression evals. Those evals fail on the original scripts
 ## Not covered
 - A live interactive Claude Code session (login can't be reached from the test sandbox).
 - Windows. Python compiles, and the hooks branch on `os.name`.
+
+## Phase 3: agent model policy
+| Check | Result |
+|---|---|
+| Frontmatter fields checked against the Claude Code docs (`model` aliases and ids, `effort` low…max, `maxTurns`, `omitClaudeMd`) | ✅ |
+| economy / balanced / quality each render 9 agents that pass `claude plugin validate` | ✅ |
+| `/models` change, then a plugin upgrade | Agents UNCHANGED (once the bug below was fixed); policy file kept (KEEP-SEED) |
+| Hand edit to an agent's model | doctor WARN (not FAIL); `apply` keeps prompt edits |
+| Invalid policy (`gpt-4`, `ultra`) | Exit 2, nothing written; doctor FAIL |
+
+**Bug found and fixed:** after `/models apply`, managed keys came out in a different order than a fresh render produced, so upgrades flagged every agent as KEEP-EDITED. Managed keys are now written in a fixed order at the end of the frontmatter.

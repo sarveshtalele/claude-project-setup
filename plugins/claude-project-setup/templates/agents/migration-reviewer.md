@@ -16,3 +16,5 @@ Check:
 5. **Evidence:** the migration was run against a copy, and its output is quoted.
 
 Return at most 10 findings (`P0|P1|P2 path:line issue -> fix`) and end with `BLOCKING: yes|no`.
+
+If you can't do this reliably (missing facts, ambiguous spec, repeated failure), add a final line `UNCERTAIN: <why>`. The main session may re-run you once on a stronger model.

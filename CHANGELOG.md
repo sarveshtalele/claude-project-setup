@@ -8,6 +8,11 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 - `approval_capture` hook: `user_approved` is recorded only from the user's own message. `state_cli` refuses it, and `guard.py` blocks it in the shell.
 - `scope_check` reads the task machine (with a `STATE.md` fallback). The verifier and implementer record transitions.
 - Tracker vendored into `tracker/`, with 4 bug fixes (stale-snapshot bypass, torn last line, missing snapshot, id path traversal) and regression evals.
+- Agent model policy (roadmap phase 3):
+  - `.claude/agent-models.json` (economy / balanced / quality profiles, per-agent overrides with globs, escalation ladder) and `apply_models.py`, which is deterministic and rewrites only the managed frontmatter keys.
+  - `/models` project skill and `create-agent` plugin skill (tier → model per profile → minimal tools → output contract).
+  - Every agent reports `UNCERTAIN:` when unsure, and `CLAUDE.md` tells the main session to retry it once on the next tier.
+  - `doctor` reports model drift (WARN) and invalid policies (FAIL).
 ### Fixed
 - Scan no longer counts dot-folder tooling (`.claude/`, `.github/`) as project source.
 

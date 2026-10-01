@@ -121,6 +121,26 @@ def check(project, tools=False):
         add("PASS" if found else "FAIL", "test_on_stop command", f"`{exe}` {'found' if found else 'not found on PATH'}",
             "use a path that works without an activated venv, e.g. .venv/bin/python or uv run")
 
+    # agent model policy
+    am_script = p(".claude", "scripts", "apply_models.py")
+    if os.path.exists(am_script) and os.path.exists(p(".claude", "agent-models.json")):
+        r = subprocess.run([sys.executable, am_script, "--check"], cwd=project, capture_output=True, text=True,
+                           env=dict(os.environ, CLAUDE_PROJECT_DIR=project), timeout=60)
+        if r.returncode != 0:
+            add("FAIL", "agent model policy", (r.stderr.strip() or "invalid")[:140], "fix .claude/agent-models.json")
+        else:
+            res = json.loads(r.stdout)
+            models = {}
+            for fn in os.listdir(p(".claude", "agents")):
+                m = re.search(r"^model:\s*(\S+)", "\n".join(lines(p(".claude", "agents", fn))), re.M)
+                models[m.group(1) if m else "(default)"] = models.get(m.group(1) if m else "(default)", 0) + 1
+            mix = ", ".join(f"{n} {k}" for k, n in sorted(models.items()))
+            if res["differs_from_policy"]:
+                add("WARN", "agent models", f"profile {res['profile']}; differ from policy: {', '.join(res['differs_from_policy'])}",
+                    "fine if edited on purpose; otherwise /models apply")
+            else:
+                add("PASS", "agent models", f"profile {res['profile']}: {mix}")
+
     # MCP secrets
     if os.path.exists(p(".mcp.json")):
         raw = "\n".join(lines(p(".mcp.json")))

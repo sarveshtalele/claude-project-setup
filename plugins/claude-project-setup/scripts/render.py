@@ -43,7 +43,7 @@ HOOK_EVENTS = {  # hook -> (event, matcher)
     "approval_capture": ("UserPromptSubmit", None),
 }
 CORE_AGENTS = ["explorer", "implementer", "verifier", "reviewer"]
-SEED_FILES = {"docs/STATE.md", "docs/ARCHITECTURE.md"}  # created once, then owned by the user
+SEED_FILES = {"docs/STATE.md", "docs/ARCHITECTURE.md", ".claude/agent-models.json"}  # created once, then the user's
 GITIGNORE_REQUIRED = [".env", ".env.*", "!.env.example", "CLAUDE.local.md", ".claude/settings.local.json",
                       ".claude/state-machine/.state-machine/*/.lock", ".claude/state-machine/.state-machine/*/*.tmp"]
 
@@ -71,6 +71,33 @@ def bootstrap_state(target):
     if not (d / "machine.json").exists():
         return None
     return c.replay_state(c.load_json(d / "machine.json"), c.read_events(d / "events.jsonl"))
+
+
+def load_module(name, rel):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(name, os.path.join(TPL, rel))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def model_policy(plan, target):
+    """The project's agent-models.json if it exists (user-owned), else built from the plan's profile."""
+    am = load_module("apply_models", "scripts/apply_models.py")
+    existing = os.path.join(target, ".claude", "agent-models.json")
+    if os.path.exists(existing):
+        with open(existing, encoding="utf-8") as f:
+            policy = json.load(f)
+    else:
+        policy = json.loads(tpl("agent-models.json"))
+        models = plan.get("models", {})
+        policy["profile"] = models.get("profile", policy["profile"])
+        policy["overrides"] = models.get("overrides", {})
+    try:
+        am.validate(policy)
+    except am.PolicyError as e:
+        raise PlanError(f"agent model policy: {e}")
+    return am, policy
 
 
 def tpl(rel):
@@ -165,6 +192,12 @@ def build(plan, target):
     mcps = mcp_entries(plan, catalog)
     v = dict(plan.get("vars", {}))
     missing, owned = [], {}
+    am, policy = model_policy(plan, target)
+    esc = policy.get("escalation", {})
+    v.setdefault("ESCALATION", f"If an agent's reply has a non-empty `UNCERTAIN:` line, or it failed the same step twice, "
+                 f"re-run it once with the Agent tool's `model` set one tier up ({' → '.join(esc.get('ladder', []))}); "
+                 f"at most {esc.get('max_steps', 1)} step. Models per agent live in `.claude/agent-models.json` "
+                 f"(profile `{policy['profile']}`); change them with `/models`.")
 
     def add(path, template, extra=None):
         owned[path] = (template, safe_frontmatter(fill(tpl(template), {**v, **(extra or {})}, path, missing)))
@@ -192,7 +225,9 @@ def build(plan, target):
         template, extra = (a, {}) if isinstance(a, str) else (a["template"], a.get("vars", {}))
         name = extra.get("AGENT_NAME", template)
         add(f".claude/agents/{name}.md", f"agents/{template}.md", extra)
-        text = owned[f".claude/agents/{name}.md"][1]
+        tmpl, text = owned[f".claude/agents/{name}.md"]
+        text = am.apply_to_text(text, am.settings_for(policy, name))
+        owned[f".claude/agents/{name}.md"] = (tmpl, text)
         desc = frontmatter(text, "description").split(". ")[0].rstrip(".")
         agent_lines.append(f"- `{name}` ({frontmatter(text, 'model')}): {desc}.")
 
@@ -205,7 +240,9 @@ def build(plan, target):
     for r in plan.get("rules", []):
         template, extra = (r, {}) if isinstance(r, str) else (r["template"], r.get("vars", {}))
         add(f".claude/rules/{template}.md", f"rules/{template}.md", extra)
-    for s in ("task", "checkpoint"):
+    owned[".claude/agent-models.json"] = ("agent-models.json", json.dumps(policy, indent=2) + "\n")
+    add(".claude/scripts/apply_models.py", "scripts/apply_models.py")
+    for s in ("task", "checkpoint", "models"):
         add(f".claude/skills/{s}/SKILL.md", f"skills/{s}/SKILL.md")
     if level in TRACKED_LEVELS:  # task state machines: tracker + definition + CLI, copied verbatim
         add(".claude/state-machine/state_cli.py", "state-machine/state_cli.py")

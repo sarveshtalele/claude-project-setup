@@ -21,6 +21,7 @@
 | Modules | `module_candidates` is not empty | "Add module CLAUDE.md for `apps/web`, `packages/api`?" | `modules` |
 | Plugins | `cps-tools.json` contains REUSE, ADD or CONFLICT plugin rows | "Enable `ponytail` (~676 tok/session) here?" / "Two style plugins: keep which?" | `plugins.enable` |
 | MCP servers | ADD rows, or SKIP rows for servers that are configured but unused | "Add Playwright MCP for UI checks? GitHub MCP (needs GITHUB_PAT)?" | `mcp` |
+| Model profile | Always (one question) | "Agent models: economy (cheapest), **balanced** (Recommended), or quality?" | `models.profile` |
 | Outputs | Brief "Outputs location" is empty | "Runs and screenshots go to `~/work/<name>-runs`?" | `vars.OUTPUTS_DIR` |
 | Existing instructions | Brownfield, with CLAUDE.md/AGENTS.md/.cursorrules present | "Merge AGENTS.md into CLAUDE.md and make it a pointer?" | merge step |
 

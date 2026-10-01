@@ -15,12 +15,14 @@
   "permissions": {"allow": ["Bash(npm test:*)"], "ask": [], "deny": ["Read(./run-outputs/**)"]},
   "plugins": {"enable": ["ponytail@ponytail"], "disable": [], "marketplaces": {}},
   "mcp": ["playwright", "github", {"custom-name": {"command": "npx", "args": ["-y", "pkg"], "env": {"KEY": "${KEY}"}}}],
+  "models": {"profile": "balanced", "overrides": {"implementer": {"model": "opus"}}},
   "gitignore": []
 }
 ```
 - The 4 core agents (`explorer`, `implementer`, `verifier`, `reviewer`) are always included. `agents` lists the extras: `security-reviewer`, `test-writer`, `migration-reviewer`, `ui-verifier`, `module-expert`.
 - Hooks by level: **light** = guard, session_context · **standard** = + stop_gate · **strict** = + scope_check, test_on_stop. `format_on_edit` is separate. `selftest` is always included.
 - `mcp` strings are catalog names (`playwright`, `context7`, `github`, `sentry`, `firecrawl`). Custom objects always get an `ask` permission. Any env or header value must be a `${VAR}` reference, or render refuses the plan.
+- `models` seeds `.claude/agent-models.json`: `profile` is `economy`, `balanced` (the default) or `quality`, and `overrides` are per agent (globs allowed). If the file already exists, it wins; it belongs to the user. Every generated agent's `model`, `effort`, `maxTurns` and `omitClaudeMd` come from it.
 - `plugins.disable` turns off, for this project only, plugins that are enabled at user scope (SKIP or CONFLICT rows the user chose to turn off).
 - `docs/STATE.md` and `docs/ARCHITECTURE.md` are **seed files**: they are created only if missing, and never diffed or upgraded afterwards. Their variables are needed only when the file doesn't exist yet.
 - `permissions.allow` should include the real test and lint commands, so the user isn't prompted for them.

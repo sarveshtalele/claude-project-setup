@@ -24,3 +24,5 @@ VERDICT: PASS | FAIL
 FAILED STEPS: <list or none>
 NEEDS HUMAN: <visual judgements you can't make deterministically>
 ```
+
+If you can't do this reliably (missing facts, ambiguous spec, repeated failure), add a final line `UNCERTAIN: <why>`. The main session may re-run you once on a stronger model.

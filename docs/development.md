@@ -27,7 +27,7 @@ claude plugin validate . && claude plugin validate plugins/claude-project-setup
 claude --plugin-dir ./plugins/claude-project-setup
 ```
 
-**Suite coverage (21 tests, stdlib only; the tracker's own 23 evals run inside it)**
+**Suite coverage (24 tests, stdlib only; the tracker's own 23 evals run inside it)**
 - **Scans:** greenfield, brownfield, modules, remotes, test folders.
 - **Tool classification:** REUSE, ADD, SKIP and CONFLICT.
 - **Rendering at all 3 levels:** each generated project's own self-test passes, dry runs write nothing, re-runs are idempotent, and your edits are kept.
@@ -39,6 +39,7 @@ claude --plugin-dir ./plugins/claude-project-setup
 - **Strict test hook:** never passes silently.
 - **Hint hook:** appears only before setup, and resumes an interrupted one.
 - **State machines:** render refuses an unapproved setup; approvals come only from your message; a changed plan needs a new approval; the task lifecycle drives scope and DONE; light level has no state machines.
+- **Model policy:** profiles and overrides render into agents; `/models apply` keeps prompt edits, and a later upgrade stays UNCHANGED; drift is a WARN; an invalid policy is refused.
 - **`doctor`**, and upgrading from the manifest.
 
 ## Adding things

@@ -7,12 +7,14 @@
 | `/claude-project-setup:bootstrap [brief path]` | Scan → interview → plan → generate → verify | "bootstrap", "set up this project" |
 | `/claude-project-setup:doctor [upgrade] [--tools]` | Health table; `upgrade` refreshes generated files | "health check", "audit setup" |
 | `/claude-project-setup:integrations [list\|add\|remove\|audit]` | Plugins and MCP servers for this project | "which MCP should I use" |
+| `/claude-project-setup:create-agent [job]` | New subagent: tier → model per profile → minimal tools → output contract → test prompt | "create an agent that…" |
 
 ## Project skills (installed into `.claude/skills/`; work without the plugin)
 | Command | Does |
 |---|---|
 | `/task <title>` | One-page task spec with allowed files and runnable acceptance checks; waits for approval |
 | `/checkpoint` | Rewrites `docs/STATE.md` (≤ 60 lines); tells you whether `/clear` is safe |
+| `/models [show\|economy\|balanced\|quality\|<agent>=<model>\|apply]` | Shows or changes the models agents use (`.claude/agent-models.json`) |
 
 ## State machines (standard and strict levels)
 | Command | Does |

@@ -24,3 +24,5 @@ CHANGED: <file list>
 ACCEPTANCE: <each command -> PASS/FAIL, with the last line of its output>
 NOT DONE / RISKS: <or "none">
 ```
+
+If you can't do this reliably (missing facts, ambiguous spec, repeated failure), add a final line `UNCERTAIN: <why>`. The main session may re-run you once on a stronger model.

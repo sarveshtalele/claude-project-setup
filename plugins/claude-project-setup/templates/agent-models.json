@@ -1,0 +1,45 @@
+{
+  "_help": "Edit 'profile' or 'overrides', then run /models apply (or: python3 .claude/scripts/apply_models.py). Keys: model (haiku|sonnet|opus|fable|inherit|<model-id>), effort (low|medium|high|xhigh|max, or null to inherit; leave null for haiku), maxTurns (int), omitClaudeMd (bool), tools / disallowedTools (optional, comma list). Agent names may use globs (e.g. *-expert). Overrides win over the profile.",
+  "profile": "balanced",
+  "overrides": {},
+  "escalation": {
+    "ladder": ["haiku", "sonnet", "opus"],
+    "max_steps": 1,
+    "when": "the agent's reply has a non-empty UNCERTAIN line, or it failed the same step twice"
+  },
+  "profiles": {
+    "economy": {
+      "explorer":           {"model": "haiku",   "effort": null,     "maxTurns": 20, "omitClaudeMd": true},
+      "verifier":           {"model": "haiku",   "effort": null,     "maxTurns": 12, "omitClaudeMd": true},
+      "ui-verifier":        {"model": "haiku",   "effort": null,     "maxTurns": 20, "omitClaudeMd": true},
+      "test-writer":        {"model": "haiku",   "effort": null,     "maxTurns": 30, "omitClaudeMd": false},
+      "implementer":        {"model": "sonnet",  "effort": "low",    "maxTurns": 50, "omitClaudeMd": false},
+      "*-expert":           {"model": "sonnet",  "effort": "low",    "maxTurns": 30, "omitClaudeMd": false},
+      "reviewer":           {"model": "sonnet",  "effort": "medium", "maxTurns": 15, "omitClaudeMd": false},
+      "security-reviewer":  {"model": "sonnet",  "effort": "medium", "maxTurns": 15, "omitClaudeMd": false},
+      "migration-reviewer": {"model": "sonnet",  "effort": "medium", "maxTurns": 15, "omitClaudeMd": false}
+    },
+    "balanced": {
+      "explorer":           {"model": "haiku",   "effort": null,     "maxTurns": 25, "omitClaudeMd": true},
+      "verifier":           {"model": "haiku",   "effort": null,     "maxTurns": 15, "omitClaudeMd": true},
+      "ui-verifier":        {"model": "sonnet",  "effort": "low",    "maxTurns": 25, "omitClaudeMd": true},
+      "test-writer":        {"model": "sonnet",  "effort": "medium", "maxTurns": 40, "omitClaudeMd": false},
+      "implementer":        {"model": "sonnet",  "effort": "medium", "maxTurns": 60, "omitClaudeMd": false},
+      "*-expert":           {"model": "sonnet",  "effort": "medium", "maxTurns": 40, "omitClaudeMd": false},
+      "reviewer":           {"model": "inherit", "effort": "high",   "maxTurns": 20, "omitClaudeMd": false},
+      "security-reviewer":  {"model": "inherit", "effort": "high",   "maxTurns": 20, "omitClaudeMd": false},
+      "migration-reviewer": {"model": "inherit", "effort": "high",   "maxTurns": 20, "omitClaudeMd": false}
+    },
+    "quality": {
+      "explorer":           {"model": "sonnet",  "effort": "low",    "maxTurns": 30, "omitClaudeMd": true},
+      "verifier":           {"model": "sonnet",  "effort": "low",    "maxTurns": 20, "omitClaudeMd": true},
+      "ui-verifier":        {"model": "sonnet",  "effort": "medium", "maxTurns": 30, "omitClaudeMd": true},
+      "test-writer":        {"model": "sonnet",  "effort": "high",   "maxTurns": 50, "omitClaudeMd": false},
+      "implementer":        {"model": "inherit", "effort": "high",   "maxTurns": 80, "omitClaudeMd": false},
+      "*-expert":           {"model": "sonnet",  "effort": "high",   "maxTurns": 50, "omitClaudeMd": false},
+      "reviewer":           {"model": "inherit", "effort": "high",   "maxTurns": 25, "omitClaudeMd": false},
+      "security-reviewer":  {"model": "inherit", "effort": "high",   "maxTurns": 25, "omitClaudeMd": false},
+      "migration-reviewer": {"model": "inherit", "effort": "high",   "maxTurns": 25, "omitClaudeMd": false}
+    }
+  }
+}

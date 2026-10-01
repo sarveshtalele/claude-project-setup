@@ -21,3 +21,5 @@ Return at most 15 findings, ordered most severe first:
 P0|P1|P2  path:line  <problem>  ->  <fix>
 ```
 End with `BLOCKING: yes|no` (yes if any P0). If you find nothing, say so. Don't invent findings.
+
+If you can't do this reliably (missing facts, ambiguous spec, repeated failure), add a final line `UNCERTAIN: <why>`. The main session may re-run you once on a stronger model.

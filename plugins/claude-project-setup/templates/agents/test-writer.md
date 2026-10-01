@@ -15,3 +15,5 @@ You write tests, not features. Framework: {{TEST_FRAMEWORK}}. Tests live in: {{T
 5. Run `{{FAST_TEST_CMD}}` and report the result.
 
 Return: the test files you added, what each test proves, and the last lines of the test output.
+
+If you can't do this reliably (missing facts, ambiguous spec, repeated failure), add a final line `UNCERTAIN: <why>`. The main session may re-run you once on a stronger model.

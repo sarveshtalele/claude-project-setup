@@ -20,3 +20,5 @@ Return at most 10 findings, most severe first:
 P0|P1|P2  path:line  <issue>  ->  <fix>
 ```
 End with `BLOCKING: yes|no`. Report only issues you can point to in the diff; no generic advice.
+
+If you can't do this reliably (missing facts, ambiguous spec, repeated failure), add a final line `UNCERTAIN: <why>`. The main session may re-run you once on a stronger model.
