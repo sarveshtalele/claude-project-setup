@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+coverage/
+.venv/
+__pycache__/
+*.tsbuildinfo
+.DS_Store
+.env
+.env.*
+!.env.example
+CLAUDE.local.md
+.claude/settings.local.json
+# run outputs, clones and screenshots live OUTSIDE the repo; this line is a safety net
+run-outputs/

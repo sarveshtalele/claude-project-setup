@@ -1,0 +1,16 @@
+{
+  "name": "claude-project-setup",
+  "owner": {
+    "name": "Sarvesh Talele"
+  },
+  "metadata": {
+    "description": "Claude Project Setup: bootstrap any greenfield or brownfield project for Claude Code with guardrails, subagents, hooks and durable context."
+  },
+  "plugins": [
+    {
+      "name": "claude-project-setup",
+      "source": "./plugins/claude-project-setup",
+      "description": "Brief \u2192 interview \u2192 approved plan \u2192 CLAUDE.md files, subagents, hooks, guardrails and MCP/plugin setup for any project."
+    }
+  ]
+}

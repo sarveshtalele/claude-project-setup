@@ -1,0 +1,4 @@
+# Paths Claude may never write (Write/Edit tools, and shell redirection to them).
+# One glob per line, matched on the project-relative path; "*" also crosses "/".
+# Always protected regardless of this file: .env*, keys, secrets/, lockfiles, .git/, .claude/hooks/, .claude/settings.json
+{{PROTECTED_LINES}}

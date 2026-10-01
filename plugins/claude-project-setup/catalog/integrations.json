@@ -1,0 +1,49 @@
+{
+  "_comment": "Curated, offline catalog. MCP entries are written to .mcp.json verbatim; secrets only as ${VAR}. Plugins are matched from the user's real installed/available listings by keyword, never invented here.",
+  "capabilities": {
+    "ui-testing":       {"keywords": ["playwright", "browser", "e2e", "screenshot", "ui test"], "auto_if": "has_frontend"},
+    "library-docs":     {"keywords": ["docs", "documentation", "context7", "library"], "auto_if": "has_dependencies"},
+    "github":           {"keywords": ["github", "pull request", "issues"], "auto_if": "remote_github"},
+    "error-monitoring": {"keywords": ["sentry", "error monitoring", "observability"], "auto_if": "framework:sentry"},
+    "web-research":     {"keywords": ["crawl", "scrape", "web search", "firecrawl"], "auto_if": null},
+    "code-review":      {"keywords": ["code review", "review"], "auto_if": null},
+    "response-style":   {"keywords": ["terse", "caveman", "lazy", "minimal", "output style"], "auto_if": null, "exclusive": true}
+  },
+  "known_plugins": {
+    "ponytail@ponytail": {"capability": "response-style"}
+  },
+  "mcp_servers": {
+    "playwright": {
+      "capability": "ui-testing",
+      "config": {"command": "npx", "args": ["@playwright/mcp@latest"]},
+      "permission": "allow",
+      "notes": "Needs Node. First run downloads a browser."
+    },
+    "context7": {
+      "capability": "library-docs",
+      "config": {"command": "npx", "args": ["-y", "@upstash/context7-mcp"]},
+      "permission": "allow",
+      "notes": "Up-to-date library docs. Optional CONTEXT7_API_KEY for higher limits."
+    },
+    "github": {
+      "capability": "github",
+      "config": {"type": "http", "url": "https://api.githubcopilot.com/mcp/", "headers": {"Authorization": "Bearer ${GITHUB_PAT}"}},
+      "permission": "ask",
+      "env": ["GITHUB_PAT"],
+      "notes": "Write tools (PRs, issues, comments) always ask."
+    },
+    "sentry": {
+      "capability": "error-monitoring",
+      "config": {"type": "http", "url": "https://mcp.sentry.dev/mcp"},
+      "permission": "allow",
+      "notes": "Authenticate yourself with /mcp (OAuth)."
+    },
+    "firecrawl": {
+      "capability": "web-research",
+      "config": {"command": "npx", "args": ["-y", "firecrawl-mcp"], "env": {"FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"}},
+      "permission": "ask",
+      "env": ["FIRECRAWL_API_KEY"],
+      "notes": "Paid API; each call asks."
+    }
+  }
+}

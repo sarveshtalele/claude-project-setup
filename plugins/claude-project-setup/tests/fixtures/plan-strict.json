@@ -1,0 +1,26 @@
+{
+  "mode": "greenfield",
+  "level": "strict",
+  "format_on_edit": true,
+  "vars": {
+    "PROJECT_NAME": "demo-app", "PROJECT_SUMMARY": "Demo app for tests.",
+    "RUNTIME": "Node 24 + TypeScript", "PACKAGE_MANAGER": "npm",
+    "INSTALL_CMD": "npm ci", "BUILD_CMD": "npm run build", "LINT_CMD": "npm run lint",
+    "TEST_CMD": "npm test", "FAST_TEST_CMD": "npm test -- --run",
+    "FORMAT_CMD": "npx prettier --write {file}", "FORMAT_GLOBS": ["*.ts", "*.tsx"],
+    "LAYOUT": "- `src/`: application code\n- `tests/`: unit tests",
+    "OUTPUTS_DIR": "~/work/demo-app-runs",
+    "ARCH_OVERVIEW": "SPA served by Vite.", "ARCH_COMPONENTS": "| web | src/ | UI | api |", "ARCH_EXTERNAL": "none",
+    "RISK_AREAS": "auth, payments", "DEV_CMD": "npm run dev", "DEV_URL": "http://localhost:5173"
+  },
+  "agents": ["security-reviewer", "ui-verifier",
+             {"template": "module-expert", "vars": {"AGENT_NAME": "api-expert", "MODULE": "api"}}],
+  "modules": [{"path": "api", "vars": {"MODULE_PURPOSE": "HTTP API.", "MODULE_ENTRY_POINTS": "- `api/index.ts`",
+               "MODULE_TEST_CMD": "npm test", "MODULE_BUILD_CMD": "npm run build", "MODULE_RULES": "- Validate input."}}],
+  "rules": ["testing", {"template": "ui", "vars": {"UI_PATHS": ["src/**/*.tsx"]}}],
+  "protected": ["backend/*"],
+  "write_allow": ["src/*", "tests/*", "api/*"],
+  "permissions": {"allow": ["Bash(npm test:*)", "Bash(npm run lint:*)"]},
+  "plugins": {"enable": ["ponytail@ponytail"]},
+  "mcp": ["playwright", "github"]
+}

@@ -1,0 +1,6 @@
+# New files matching these globs are created without asking.
+# Any other NEW file makes .claude/hooks/guard.py ask you first (the file-consent rule).
+# Globs are matched on the project-relative path; "*" also crosses "/".
+specs/tasks/TASK-*.md
+docs/adr/*.md
+{{WRITE_ALLOW_LINES}}
