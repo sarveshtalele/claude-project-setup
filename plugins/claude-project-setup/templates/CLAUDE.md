@@ -37,6 +37,7 @@
 - Paths in `.claude/protected.txt`, secrets, lockfiles, `.git/` and `.claude/` config are never written.
 - No force-push, `reset --hard`, `sudo` or `curl | sh`. Dependency installs and `git push` always ask.
 - If a hook blocks you, report the block and ask. Never work around it.
+- Commits and PRs carry no AI co-author or attribution lines (`attribution` is off in settings) unless the user asks.
 {{MCP_SETUP}}
 ## Definition of done
 Acceptance commands pass · only allowed files changed · `docs/STATE.md` updated · no stray files · reviewer has no P0 findings.

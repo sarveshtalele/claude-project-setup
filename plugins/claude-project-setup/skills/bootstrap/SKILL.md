@@ -11,6 +11,7 @@ Scripts live in `${CLAUDE_PLUGIN_ROOT}/scripts/`. Use `python` instead of `pytho
 Keep scratch files in the OS temp dir (`${TMPDIR:-/tmp}`), never in the project.
 
 ## 1. Scan (deterministic, no exploring by hand)
+Skip this step if `brief` just wrote `${TMPDIR:-/tmp}/cps-scan.json` in this session.
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/scan_repo.py" . > "${TMPDIR:-/tmp}/cps-scan.json"
 ```
@@ -18,8 +19,7 @@ Read the JSON. It decides `mode` (greenfield or brownfield), lists module candid
 
 ## 2. Brief
 Read `$ARGUMENTS`, or `PROJECT-BRIEF.md` if no path was given.
-- Missing in **greenfield**: run `/claude-project-setup:brief` first and stop; the user fills the brief in by hand.
-- Missing in **brownfield**: offer the brief, or continue from the scan alone. Ask the user which.
+- Missing: invoke the `claude-project-setup:brief` skill first. It drafts the brief from the user's description and hands control back here.
 
 ## 3. Tool inventory
 ```bash

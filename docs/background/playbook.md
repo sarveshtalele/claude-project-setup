@@ -1,9 +1,9 @@
 # Claude Code project kit
 
-> **Note (v0.2.0):** the `template/` folder this document refers to is now produced by the **Claude Project Setup** plugin. Run `/claude-project-setup:bootstrap` instead of copying files by hand (see the [README](../README.md)).
+> **Note (v0.2.0):** the `template/` folder this document refers to is now produced by the **Claude Project Setup** plugin. Run `/claude-project-setup:bootstrap` instead of copying files by hand (see the [README](../../README.md)).
 
 This is a playbook and a copy-ready `template/` for starting any project with Claude Code. It aims for accurate results, low token use, and guardrails that are enforced by machinery rather than requested in prose.
-It was built from an audit of the "Migration agent skills architecture" session. Read **[SESSION-AUDIT.md](SESSION-AUDIT.md)** for what went wrong there and the fix plan for that repo.
+It was built from an audit of the "Migration agent skills architecture" session. Read **[session-audit.md](session-audit.md)** for what went wrong there and the fix plan for that repo.
 
 ```
 claude-project-kit/

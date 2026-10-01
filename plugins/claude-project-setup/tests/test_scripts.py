@@ -282,6 +282,18 @@ def agent_frontmatter_stays_valid_yaml():  # E2E-9
 
 
 @test
+def plugin_hint_only_before_setup():
+    t = fresh_repo()
+    env = dict(os.environ, CLAUDE_PROJECT_DIR=t)
+    run = lambda: subprocess.run([PY, os.path.join(SCRIPTS, "hint.py")], capture_output=True, text=True, env=env).stdout
+    assert "claude-project-setup:brief" in run()
+    touch(t, "PROJECT-BRIEF.md", "# b")
+    assert "claude-project-setup:bootstrap" in run()
+    render(t, plan())
+    assert run() == "", run()
+
+
+@test
 def upgrade_from_manifest_without_plan():
     t = fresh_repo()
     render(t, plan())

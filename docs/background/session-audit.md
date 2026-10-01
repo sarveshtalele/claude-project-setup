@@ -1,6 +1,6 @@
 # Session audit: "Migration agent skills architecture"
 
-> **Note (v0.2.0):** the `template/` folder this document refers to is now produced by the **Claude Project Setup** plugin. Run `/claude-project-setup:bootstrap` instead of copying files by hand (see the [README](../README.md)).
+> **Note (v0.2.0):** the `template/` folder this document refers to is now produced by the **Claude Project Setup** plugin. Run `/claude-project-setup:bootstrap` instead of copying files by hand (see the [README](../../README.md)).
 
 Source: session `local_a8b6604b…` (CLI id `cfc8ba68…`), project `~/Downloads/codebase-migration-factory`.
 I parsed the full transcript (19,874 JSONL records, 60 MB) and its subagent transcript, and checked the repo on disk on 2026-10-01.
