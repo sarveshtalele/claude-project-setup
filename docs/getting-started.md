@@ -22,7 +22,7 @@ claude plugin install claude-project-setup@claude-project-setup
 cd my-project && claude
 ```
 
-Only `plugins/claude-project-setup/` is installed (skills, scripts, templates, one hook). This `docs/` folder isn't.
+Only `plugins/claude-project-setup/` is installed: skills, scripts, templates, the tracker and two plugin hooks (session hint, approval capture). This `docs/` folder isn't. Step-by-step instructions for every kind of project are in the [Setup guide](setup-guide.md).
 
 ### Try without installing
 ```bash

@@ -2,6 +2,15 @@
 
 All notable changes to this project. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versions follow [SemVer](https://semver.org/).
 
+## [0.4.1] - 2026-10-02
+### Added
+- `docs/system-design.md`: components, data model, state machines, main flows, trust boundaries, failure handling and design decisions.
+- `docs/setup-guide.md`: step-by-step setup for new apps, existing repositories, monorepos, libraries, Agent Skills and plugins, plus after-setup routine, team rollout and a checklist.
+- `docs/assets/system-architecture.svg`: one diagram showing how the plugin, the generated project and the state machines work together, with numbered flows.
+- `tools/package.py`: release packaging. It checks the version, tests and validation, then builds `dist/claude-project-setup-<version>.zip` with a SHA-256 file.
+### Fixed
+- Docs: outdated plugin layout in `development.md` and the plugin contents in `getting-started.md`. The library setup step now gives a concrete path-scoped rule.
+
 ## [0.4.0] - 2026-10-02
 ### Changed
 - README redesigned to a conventional open-source layout, with five light-theme SVG diagrams (workflow, architecture, guardrail levels, task lifecycle, generated files) and no emojis.

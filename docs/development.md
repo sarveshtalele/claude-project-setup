@@ -5,14 +5,17 @@
 claude-project-setup/                ← marketplace (this repo)
 ├── .claude-plugin/marketplace.json
 ├── README.md · CHANGELOG.md
-├── docs/                            ← documentation (not installed)
+├── docs/                            ← documentation and diagrams (not installed)
+├── tools/package.py                 ← release packaging (not installed)
 └── plugins/claude-project-setup/    ← the plugin (installed)
     ├── .claude-plugin/plugin.json
-    ├── hooks/hooks.json             ← SessionStart hint
+    ├── hooks/hooks.json             ← SessionStart hint, UserPromptSubmit approval capture
     ├── skills/                      ← brief · bootstrap (+references) · doctor · integrations
-    ├── scripts/                     ← scan_repo · scan_tools · render · doctor · hint
+    │                                   create-skill · create-agent · create-plugin
+    ├── scripts/                     ← scan_repo · scan_tools · render · scaffold · doctor · hint
+    ├── tracker/                     ← state machine engine + its 23 evals
     ├── catalog/integrations.json
-    ├── templates/                   ← everything render.py can write
+    ├── templates/                   ← everything render.py and scaffold.py can write
     └── tests/                       ← test_scripts.py + fixtures/
 ```
 
@@ -52,10 +55,23 @@ claude --plugin-dir ./plugins/claude-project-setup
 | Template variable | the template | `references/plan.md` variable table |
 
 ## Release
-1. Bump `version` in `plugins/claude-project-setup/.claude-plugin/plugin.json`.
-2. Add an entry to `CHANGELOG.md`.
-3. Make sure the tests and both `claude plugin validate` runs pass.
-4. Tag it `v<version>` and push.
+1. Bump `version` in `plugins/claude-project-setup/.claude-plugin/plugin.json` and the README version badge.
+2. Add a `## [<version>]` section to `CHANGELOG.md`, then commit.
+3. Build the package. The tool refuses a dirty tree, a version mismatch, failing tests or failed validation.
+
+   ```bash
+   python3 tools/package.py
+   ```
+
+4. Tag and push, then publish the package as a GitHub release.
+
+   ```bash
+   git tag -a v<version> -m "v<version>" && git push origin main v<version>
+   ```
+
+   ```bash
+   gh release create v<version> dist/claude-project-setup-<version>.zip dist/claude-project-setup-<version>.zip.sha256 --title "v<version>" --notes-file <notes>
+   ```
 
 ## Conventions
 - Python 3.9+ standard library only. No third-party dependencies.

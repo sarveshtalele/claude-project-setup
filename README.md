@@ -4,7 +4,7 @@
 
 **Set up any project for Claude Code from a plain-language description, with guardrails that are enforced rather than requested.**
 
-[![Version](https://img.shields.io/badge/version-0.4.0-4f46e5?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.4.1-4f46e5?style=flat-square)](CHANGELOG.md)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757?style=flat-square)](https://code.claude.com/docs/en/plugins)
 [![Python](https://img.shields.io/badge/python-3.9%2B-3776AB?style=flat-square&logo=python&logoColor=white)](docs/getting-started.md#prerequisites)
 [![Dependencies](https://img.shields.io/badge/dependencies-none-047857?style=flat-square)](docs/development.md#conventions)
@@ -62,13 +62,13 @@ To try it without installing, clone the repository and run `claude --plugin-dir 
 4. Review the setup plan and reply **approved**.
 5. Start a new session, accept the workspace trust prompt, and run `/task <first requirement>`.
 
-See [Getting started](docs/getting-started.md) for the full walkthrough.
+Step-by-step instructions for new apps, existing repositories, monorepos, libraries, skills and plugins are in the [Setup guide](docs/setup-guide.md).
 
 ## How it works
 
-<p align="center"><img src="docs/assets/architecture.svg" alt="Architecture: the plugin renders files from a plan into your project" width="100%"></p>
+<p align="center"><img src="docs/assets/system-architecture.svg" alt="System architecture: plugin, project and state machines" width="100%"></p>
 
-The plugin's scripts scan the repository and your installed tools without spending model tokens. Claude interviews you and writes a setup plan, and `render.py` turns that plan into files. Files you have edited are never overwritten, and upgrades only replace generated files that are unchanged. Details: [Workflow](docs/workflow.md) and [Architecture](docs/architecture.md).
+The plugin's scripts scan the repository and your installed tools without spending model tokens. Claude interviews you and writes a setup plan, and `render.py` turns that plan into files. Files you have edited are never overwritten, and upgrades only replace generated files that are unchanged. Details: [System design](docs/system-design.md), [Workflow](docs/workflow.md) and [Architecture](docs/architecture.md).
 
 ## Guardrails
 
@@ -142,6 +142,8 @@ Full reference: [Commands](docs/commands.md).
 | Guide | Contents |
 |---|---|
 | [Getting started](docs/getting-started.md) | Prerequisites, installation, first run, updates |
+| [Setup guide](docs/setup-guide.md) | Step by step for every kind of project, after-setup routine, team rollout |
+| [System design](docs/system-design.md) | Components, data model, state machines, flows, trust boundaries, failure handling |
 | [User guide](docs/user-guide.md) | Daily loop: brief, bootstrap, tasks, checkpoints |
 | [Workflow](docs/workflow.md) | Bootstrap step by step, greenfield and brownfield |
 | [Guardrails](docs/guardrails.md) | Levels, hooks, protected paths, permissions |

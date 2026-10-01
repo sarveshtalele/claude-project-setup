@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="990" viewBox="0 0 1200 990" role="img" aria-label="System architecture: plugin, project and state machines" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<title>System architecture: plugin, project and state machines</title>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/></marker></defs>
+<rect width="1200" height="990" rx="14" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="24" y="40" font-size="20" font-weight="650" fill="#0f172a" text-anchor="start">System architecture</text>
+<text x="24" y="64" font-size="14" font-weight="400" fill="#64748b" text-anchor="start">How the plugin, the generated project and the state machines work together. Numbers match the flows below.</text>
+<rect x="24" y="92" width="220" height="76" rx="12" fill="#eef2ff" stroke="#4f46e5"/>
+<text x="40" y="122" font-size="15" font-weight="700" fill="#4f46e5" text-anchor="start">You</text>
+<text x="40" y="144" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">describe, answer, approve</text>
+<rect x="24" y="196" width="760" height="624" rx="14" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="44" y="226" font-size="15" font-weight="700" fill="#0f172a" text-anchor="start">Claude Code session</text>
+<rect x="44" y="244" width="720" height="236" rx="12" fill="#ffffff" stroke="#4f46e5" stroke-dasharray="5 4"/>
+<text x="60" y="268" font-size="13" font-weight="700" fill="#4f46e5" text-anchor="start">Plugin (installed once)</text>
+<rect x="60" y="284" width="220" height="180" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="74" y="308" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start">Skills</text>
+<text x="74" y="330" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">brief, bootstrap</text>
+<text x="74" y="349" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">doctor, integrations</text>
+<text x="74" y="368" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">create-skill, create-agent</text>
+<text x="74" y="387" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">create-plugin</text>
+<rect x="296" y="284" width="220" height="180" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="310" y="308" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start">Plugin hooks</text>
+<text x="310" y="330" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">SessionStart: hint and resume</text>
+<text x="310" y="349" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">UserPromptSubmit:</text>
+<text x="310" y="368" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">approval capture (before setup)</text>
+<rect x="532" y="284" width="216" height="180" rx="10" fill="#ecfdf5" stroke="#047857"/>
+<text x="546" y="308" font-size="13" font-weight="700" fill="#047857" text-anchor="start">Scripts (no model tokens)</text>
+<text x="546" y="330" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">scan_repo, scan_tools</text>
+<text x="546" y="349" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">render.py (plan in, files out)</text>
+<text x="546" y="368" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">scaffold.py (skills, plugins)</text>
+<text x="546" y="387" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">doctor.py (health, upgrade)</text>
+<rect x="44" y="504" width="720" height="276" rx="12" fill="#ffffff" stroke="#047857" stroke-dasharray="5 4"/>
+<text x="60" y="528" font-size="13" font-weight="700" fill="#047857" text-anchor="start">Your project (generated, committed)</text>
+<rect x="60" y="544" width="220" height="220" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="74" y="568" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start">Instructions and memory</text>
+<text x="74" y="590" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">CLAUDE.md (root, modules)</text>
+<text x="74" y="609" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">.claude/rules/*.md</text>
+<text x="74" y="628" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">docs/STATE.md</text>
+<text x="74" y="647" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">specs/tasks/TASK-*.md</text>
+<text x="74" y="666" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">PROJECT-BRIEF.md</text>
+<rect x="296" y="544" width="220" height="220" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="310" y="568" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start">Agents and skills</text>
+<text x="310" y="590" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">explorer, implementer</text>
+<text x="310" y="609" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">verifier, reviewer</text>
+<text x="310" y="628" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">specialists by role</text>
+<text x="310" y="647" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">agent-models.json</text>
+<text x="310" y="666" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">/task, /checkpoint, /models</text>
+<text x="310" y="685" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">generated skills</text>
+<rect x="532" y="544" width="216" height="220" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="546" y="568" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start">Project hooks</text>
+<text x="546" y="590" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">guard (paths, shell)</text>
+<text x="546" y="609" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">session_context</text>
+<text x="546" y="628" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">stop_gate</text>
+<text x="546" y="647" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">approval_capture</text>
+<text x="546" y="666" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">scope_check (strict)</text>
+<text x="546" y="685" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">test_on_stop (strict)</text>
+<rect x="808" y="92" width="368" height="728" rx="14" fill="#fffbeb" stroke="#b45309"/>
+<text x="828" y="122" font-size="15" font-weight="700" fill="#b45309" text-anchor="start">State machines</text>
+<text x="828" y="142" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">one engine, three kinds of machine</text>
+<rect x="824" y="158" width="336" height="140" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="838" y="182" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start">Tracker engine (stdlib Python)</text>
+<text x="838" y="204" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">init_machine, transition, assert_state</text>
+<text x="838" y="223" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">query_state, resume, render_reports</text>
+<text x="838" y="242" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">lock file serialises writers</text>
+<text x="838" y="261" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">guards are recorded events</text>
+<rect x="824" y="310" width="336" height="64" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="838" y="334" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start">Front ends</text>
+<text x="838" y="356" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">state_cli.py (bootstrap, tasks), skill_state.py</text>
+<rect x="824" y="386" width="336" height="100" rx="10" fill="#ffffff" stroke="#4f46e5"/>
+<text x="838" y="410" font-size="13" font-weight="700" fill="#4f46e5" text-anchor="start">bootstrap</text>
+<text x="838" y="432" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">SCANNED, BRIEFED, INTERVIEWED, PLANNED</text>
+<text x="838" y="451" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">APPROVED (needs user_approved)</text>
+<text x="838" y="470" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">GENERATED, VERIFIED</text>
+<rect x="824" y="498" width="336" height="100" rx="10" fill="#ffffff" stroke="#4f46e5"/>
+<text x="838" y="522" font-size="13" font-weight="700" fill="#4f46e5" text-anchor="start">TASK-&lt;id&gt;</text>
+<text x="838" y="544" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">PLANNED, APPROVED (needs user_approved)</text>
+<text x="838" y="563" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">IN_PROGRESS, VERIFYING</text>
+<text x="838" y="582" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">DONE (needs verify_passed)</text>
+<rect x="824" y="610" width="336" height="100" rx="10" fill="#ffffff" stroke="#4f46e5"/>
+<text x="838" y="634" font-size="13" font-weight="700" fill="#4f46e5" text-anchor="start">skill-&lt;name&gt;</text>
+<text x="838" y="656" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">one state per skill step</text>
+<text x="838" y="675" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">review gates need user_approved</text>
+<text x="838" y="694" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">rework returns to the previous step</text>
+<rect x="824" y="722" width="336" height="82" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="838" y="746" font-size="12" font-weight="650" fill="#0f172a" text-anchor="start">events.jsonl: append-only, the truth</text>
+<text x="838" y="766" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">state-snapshot.json: a cache</text>
+<text x="838" y="786" font-size="12" font-weight="400" fill="#64748b" text-anchor="start">replayed on every read; resumable</text>
+<path d="M134,168 V194" fill="none" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<circle cx="152" cy="182" r="11" fill="#b45309"/>
+<text x="152" y="186" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<path d="M406,284 V236 H806" fill="none" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<circle cx="600" cy="236" r="11" fill="#b45309"/>
+<text x="600" y="240" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+<path d="M748,374 H806" fill="none" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<circle cx="777" cy="360" r="11" fill="#b45309"/>
+<text x="777" y="364" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+<path d="M640,464 V502" fill="none" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<circle cx="660" cy="484" r="11" fill="#b45309"/>
+<text x="660" y="488" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+<path d="M748,666 H806" fill="none" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<circle cx="777" cy="652" r="11" fill="#b45309"/>
+<text x="777" y="656" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">5</text>
+<path d="M406,764 V798 H806" fill="none" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#arr)"/>
+<circle cx="600" cy="798" r="11" fill="#b45309"/>
+<text x="600" y="802" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">6</text>
+<rect x="24" y="842" width="1152" height="132" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="44" y="868" font-size="14" font-weight="700" fill="#0f172a" text-anchor="start">Flows</text>
+<circle cx="54" cy="892" r="11" fill="#b45309"/>
+<text x="54" y="896" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<text x="74" y="896" font-size="12.5" font-weight="400" fill="#0f172a" text-anchor="start">You describe, answer and approve in chat.</text>
+<circle cx="54" cy="918" r="11" fill="#b45309"/>
+<text x="54" y="922" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+<text x="74" y="922" font-size="12.5" font-weight="400" fill="#0f172a" text-anchor="start">Before setup, the plugin's approval hook records user_approved on the bootstrap machine.</text>
+<circle cx="54" cy="944" r="11" fill="#b45309"/>
+<text x="54" y="948" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+<text x="74" y="948" font-size="12.5" font-weight="400" fill="#0f172a" text-anchor="start">render.py refuses to write until bootstrap is APPROVED, then advances it.</text>
+<circle cx="620" cy="892" r="11" fill="#b45309"/>
+<text x="620" y="896" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+<text x="640" y="896" font-size="12.5" font-weight="400" fill="#0f172a" text-anchor="start">render.py writes the project files from the approved plan.</text>
+<circle cx="620" cy="918" r="11" fill="#b45309"/>
+<text x="620" y="922" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">5</text>
+<text x="640" y="922" font-size="12.5" font-weight="400" fill="#0f172a" text-anchor="start">Project hooks record approvals for tasks and skills; scope_check reads task state.</text>
+<circle cx="620" cy="944" r="11" fill="#b45309"/>
+<text x="620" y="948" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">6</text>
+<text x="640" y="948" font-size="12.5" font-weight="400" fill="#0f172a" text-anchor="start">Agents and skills move their machines: start, submit, verify_passed, done.</text>
+</svg>
